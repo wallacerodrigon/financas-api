@@ -66,8 +66,12 @@ public abstract class AbstractPersistenciaPadraoDao<T> implements PersistenciaPa
 		CriteriaQuery<T> select = criteriaQueryTemp.select(from);
 		montarClausulasWhere(filtros, criteriaBuilder, from, select);
 		
-		return pagina != -1 ? em.createQuery(criteriaQueryTemp).setMaxResults(qtdRegistrosPagina)
-				.setFirstResult(pagina * qtdRegistrosPagina) : em.createQuery(criteriaQueryTemp);
+		return pagina != -1 ? 
+				em.createQuery(criteriaQueryTemp)
+				.setMaxResults(qtdRegistrosPagina)
+				.setFirstResult(pagina * qtdRegistrosPagina) 
+				: 
+				em.createQuery(criteriaQueryTemp);
 	}
 
 	/**

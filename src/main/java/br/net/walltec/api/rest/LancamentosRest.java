@@ -3,7 +3,10 @@
  */
 package br.net.walltec.api.rest;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -12,10 +15,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
+import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
 import br.net.walltec.api.importacao.estrategia.ImportadorBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
@@ -23,6 +31,7 @@ import br.net.walltec.api.importacao.estrategia.ImportadorCefTxt;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
+import br.net.walltec.api.rest.comum.RetornoRestDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import io.swagger.annotations.Api;
 
@@ -80,17 +89,54 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		// TODO Auto-generated method stub
 		return Lancamento.class;
 	}
+	
+	@GET
+	@Path("/filtrar/mes/{mes}/ano/{ano}")
+	public RetornoRestDTO<PageResponse<List<Lancamento>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
+		try {
+			PageResponse<List<Lancamento>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
+			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.OK)
+					.comEsteRetorno(listaLancamentos)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
 
 	@POST
 	@Path("/excluir-lote")
-	public void excluirEmLote() {
-		
+	public RetornoRestDTO excluirEmLote(List<Integer> idsLancamentos) {
+		try {
+			this.servico.excluirParcelas(idsLancamentos);
+			return new RetornoRestDTO().comEsteCodigo(Status.NO_CONTENT)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 	
 	@PUT
 	@Path("/baixar-lote")
-	public void baixarEmLote() {
-		
+	public RetornoRestDTO baixarEmLote(List<Integer> idsLancamentos) {
+		try {
+			this.servico.baixarParcelas(idsLancamentos);
+			return new RetornoRestDTO().comEsteCodigo(Status.OK)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 
 	@POST
@@ -136,6 +182,61 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	}
 	
 	
+	@Override
+	public RetornoRestDTO<Lancamento> salvar(Lancamento objeto) throws WebServiceException {
+		String[] dadosDataVencimento = objeto.getDataVencimentoString().split("-");
+		
+		objeto.setDataVencimento(LocalDate.of(Integer.valueOf(dadosDataVencimento[0]), 
+				Integer.valueOf(dadosDataVencimento[1]), 
+				Integer.valueOf(dadosDataVencimento[2])));
+		
+		
+		if (objeto.getDataHoraPagamentoString() != null) {
+			String[] dadosDataPagamento = objeto.getDataHoraPagamentoString().split("-");
+			String[] dadosHorario = dadosDataPagamento[2].split(" ")[1].split(":");
+					
+			
+			objeto.setDataHoraPagamento(
+					LocalDateTime.of(
+						Integer.valueOf(dadosDataVencimento[0]).intValue(), 
+						Integer.valueOf(dadosDataVencimento[1]).intValue(), 
+						Integer.valueOf(dadosDataVencimento[2].split(" ")[0]).intValue(),
+						Integer.valueOf(dadosHorario[0]),
+						Integer.valueOf(dadosHorario[1])
+					)
+			);
+		}
+		
+		return super.salvar(objeto);
+	}
+	
+	@Override
+	public RetornoRestDTO<Lancamento> alterar(Lancamento objeto) throws WebServiceException {
+		String[] dadosDataVencimento = objeto.getDataVencimentoString().split("-");
+		
+		objeto.setDataVencimento(LocalDate.of(Integer.valueOf(dadosDataVencimento[0]), 
+				Integer.valueOf(dadosDataVencimento[1]), 
+				Integer.valueOf(dadosDataVencimento[2])));
+		
+		
+		if (objeto.getDataHoraPagamentoString() != null) {
+			String[] dadosDataPagamento = objeto.getDataHoraPagamentoString().split("-");
+			String[] dadosHorario = dadosDataPagamento[2].split(" ")[1].split(":");
+					
+			
+			objeto.setDataHoraPagamento(
+					LocalDateTime.of(
+						Integer.valueOf(dadosDataVencimento[0]).intValue(), 
+						Integer.valueOf(dadosDataVencimento[1]).intValue(), 
+						Integer.valueOf(dadosDataVencimento[2].split(" ")[0]).intValue(),
+						Integer.valueOf(dadosHorario[0]),
+						Integer.valueOf(dadosHorario[1])
+					)
+			);
+		}
+		
+		return super.alterar(objeto);
+	}
 	
 }
 
