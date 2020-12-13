@@ -1,0 +1,85 @@
+/**
+ * 
+ */
+package br.net.walltec.api.negocio.servicos;
+
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import br.net.walltec.api.dto.ConsultaLancamentosDTO;
+import br.net.walltec.api.dto.FiltraParcelasDto;
+import br.net.walltec.api.dto.GeracaoParcelasDto;
+import br.net.walltec.api.dto.LancamentosPorRubricaDTO;
+import br.net.walltec.api.dto.MapaDashboardDTO;
+import br.net.walltec.api.dto.RegistroExtratoDto;
+import br.net.walltec.api.dto.ResumoMesAnoDTO;
+import br.net.walltec.api.dto.TipoContaNoMesDTO;
+import br.net.walltec.api.dto.UtilizacaoLancamentoDTO;
+import br.net.walltec.api.dto.UtilizacaoParcelasDto;
+import br.net.walltec.api.entidades.DeparaHistoricoBanco;
+import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
+import br.net.walltec.api.rest.dto.filtro.DesfazimentoConciliacaoDTO;
+import br.net.walltec.api.rest.dto.filtro.RegistroFechamentoMesDTO;
+
+/**
+ * @author Wallace
+ *
+ */
+public interface LancamentoService extends CrudPadraoService<Lancamento> {
+	
+	ConsultaLancamentosDTO consultaParcelasEmArvore(FiltraParcelasDto dtoFiltro) throws NegocioException;
+	
+	List<Lancamento> listarParcelas(FiltraParcelasDto dtoFiltro) throws NegocioException;
+	
+	boolean baixarParcelas(List<Integer> idsLancamentos) throws NegocioException;
+
+	boolean excluirParcelas(List<Integer> idsLancamentos) throws NegocioException;
+	
+	List<Lancamento> utilizarLancamento(UtilizacaoParcelasDto dtoUtilizacao) throws NegocioException;
+	
+	List<UtilizacaoLancamentoDTO> listarHistoricoUso(Integer idLancamento) throws NegocioException;
+	
+	List<Lancamento>  montarListaLancamentos( GeracaoParcelasDto dto ) throws NegocioException;
+	
+	MapaDashboardDTO montarDashboards(Integer mes, Integer ano) throws NegocioException;
+	
+	List<Lancamento> gerarLancamentos(GeracaoParcelasDto dto) throws NegocioException;
+	
+	void associarLancamentos(List<RegistroExtratoDto> lancamentos) throws NegocioException;
+
+	/**
+	 * @param desfazimentoDTO
+	 */
+	void desfazerConciliacoes(DesfazimentoConciliacaoDTO desfazimentoDTO) throws NegocioException;
+
+	/**
+	 * @param fechamentoDTO
+	 */
+	void fecharMes(RegistroFechamentoMesDTO fechamentoDTO) throws NegocioException;
+	
+	boolean isMesFechado(int mes, int ano) throws NegocioException;
+	
+	Set<TipoContaNoMesDTO> getResumoPorTipoConta(List<Lancamento> lancamentos) throws NegocioException;
+
+	/**
+	 * @param ano
+	 * @return
+	 */
+	List<ResumoMesAnoDTO> gerarMapaAno(Integer ano) throws NegocioException;
+	
+	List<LancamentosPorRubricaDTO> listarLancamentosPorRubricaEAno(Integer ano, Integer idRubrica) throws NegocioException;
+	
+	void excluirParcelasPorPeriodo(Date dataInicio, Date dataFim) throws NegocioException;
+	
+	void excluirListaParcelas(List<Lancamento> lancamentos) throws NegocioException;
+
+	List<RegistroExtratoDto> conciliarLancamentos(List<Lancamento> lancamentosDoExtrato, List<DeparaHistoricoBanco> listaDeparas, Integer numBanco, Date dataBase) throws NegocioException;
+
+	List<Lancamento> criarParcelas(GeracaoParcelasDto dto) throws NegocioException;
+
+	Integer gerarNumeroProxLancamento(Lancamento lancamentoBase) throws NegocioException;
+}
