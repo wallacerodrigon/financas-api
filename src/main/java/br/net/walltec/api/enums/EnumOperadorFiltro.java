@@ -3,6 +3,7 @@
  */
 package br.net.walltec.api.enums;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -10,6 +11,8 @@ import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
+import br.net.walltec.api.utilitarios.UtilData;
 
 /**
  * @author wallace
@@ -62,13 +65,29 @@ public enum EnumOperadorFiltro {
 
 	},
 	
+	DATA_INICIAL_MAIOR_QUE {
+		@Override
+		public Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor) {
+			return builder.greaterThanOrEqualTo(root.get(campo).as(Date.class), UtilData.getDataPorPattern(valor.toString(), UtilData.PATTERN_DATA_ISO));
+		}
+
+	},
+	
+	DATA_FINAL_MENOR_QUE {
+		@Override
+		public Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor) {
+			return builder.lessThanOrEqualTo(root.get(campo).as(Date.class), UtilData.getDataPorPattern(valor.toString(), UtilData.PATTERN_DATA_ISO));
+		}
+
+	},
+	
 	LE {
 		@Override
 		public Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor) {
 			if (valor instanceof Number) {
-				return builder.le(root.get(campo), (Integer)valor);
+				return builder.le(root.get(campo), (Number)valor);
 			}
-			return null;
+			throw new IllegalArgumentException("Valor deve ser um número");
 		}
 
 	},
@@ -77,9 +96,9 @@ public enum EnumOperadorFiltro {
 		@Override
 		public Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor) {
 			if (valor instanceof Number) {
-				return builder.ge(root.get(campo), (Integer)valor);
+				return builder.ge(root.get(campo), (Number)valor);
 			}
-			return null;
+			throw new IllegalArgumentException("Valor deve ser um número");
 		}
 
 	},
@@ -100,7 +119,15 @@ public enum EnumOperadorFiltro {
 			return builder.not((Expression<Boolean>)valor);
 		}
 
+	},
+	
+	BETWEEN {
+		@Override
+		public Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor) {
+			return null; //builder.between(  v, x, y);
+		}
 	};
+	
 	
 	public abstract Predicate obterPredicado(CriteriaBuilder builder, Root<?> root, String campo, Object valor);
 	

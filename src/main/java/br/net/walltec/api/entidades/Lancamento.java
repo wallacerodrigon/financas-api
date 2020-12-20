@@ -78,8 +78,8 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	private String dataVencimentoString;
 	
 	@Transient
-
 	private String dataHoraPagamentoString;
+
 
 }
  

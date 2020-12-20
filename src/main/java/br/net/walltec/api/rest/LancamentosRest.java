@@ -164,9 +164,9 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	}
 	
 	@GET
-	@Path("/totalizador/resumo-anual")
+	@Path("/totalizador/resumo-anual/{ano}/ano")
 	public void listarResumoPorMesEAno() {
-		
+		//retornar um dto com: ano, array de : mes - valor total
 	}
 	
 	//estatisticas

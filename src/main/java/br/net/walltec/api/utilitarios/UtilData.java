@@ -31,6 +31,8 @@ public class UtilData {
     private static ZoneId zone = ZoneId.of("Brazil/East");
 
 	public static final String PATTERN_DATA_BR = "dd/MM/yyyy";
+	
+	public static final String PATTERN_DATA_ISO = "yyyy-MM-dd";
 
 	private static final String PATTERN_DATA_HORA_BR = PATTERN_DATA_BR + " HH:mm:ss";
 

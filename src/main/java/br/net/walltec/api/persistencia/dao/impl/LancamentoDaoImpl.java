@@ -28,13 +28,13 @@ public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento>
 		
 		FiltroConsulta filtroInicial = new FiltroConsulta();
 		filtroInicial.setNomeCampo("dataVencimento");
-		filtroInicial.setOperador(EnumOperadorFiltro.GE);
-		filtroInicial.setValor( UtilData.getDataFormatada(dataInicial, "yyyy-MM-dd") );
+		filtroInicial.setOperador(EnumOperadorFiltro.DATA_INICIAL_MAIOR_QUE);
+		filtroInicial.setValor( UtilData.getDataFormatada(dataInicial, UtilData.PATTERN_DATA_ISO) );
 		
 		FiltroConsulta filtroFinal = new FiltroConsulta();
 		filtroFinal.setNomeCampo("dataVencimento");
-		filtroFinal.setOperador(EnumOperadorFiltro.LE);
-		filtroFinal.setValor( UtilData.getDataFormatada(dataFinal, "yyyy-MM-dd") );
+		filtroFinal.setOperador(EnumOperadorFiltro.DATA_FINAL_MENOR_QUE);
+		filtroFinal.setValor( UtilData.getDataFormatada(dataFinal,  UtilData.PATTERN_DATA_ISO) );
 		listaFiltros = Arrays.asList(filtroInicial, filtroFinal);
 		
 		Pageable pageable = new PageRequest(0, 99999);
