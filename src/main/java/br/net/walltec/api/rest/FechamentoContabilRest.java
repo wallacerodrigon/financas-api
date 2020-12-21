@@ -3,19 +3,24 @@
  */
 package br.net.walltec.api.rest;
 
+import java.time.LocalDateTime;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import br.net.walltec.api.dto.FechamentoMensalDTO;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.negocio.servicos.FechamentoContabilService;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
+import br.net.walltec.api.rest.comum.RetornoRestDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import io.swagger.annotations.Api;
 
@@ -56,8 +61,14 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 		return FechamentoContabil.class;
 	}
 	
-	public void fecharMes() {
-		
+	@POST
+	@Path("/fechar-mes")
+	public RetornoRestDTO<FechamentoContabil> fecharMes(FechamentoMensalDTO dto) {
+			FechamentoContabil fechamento = new FechamentoContabil();
+			fechamento.setDataFechamento(LocalDateTime.now());
+			fechamento.setNumAno(dto.getNumAno());
+			fechamento.setNumMes(dto.getNumMes());
+			return super.salvar(fechamento);
 	}
 	
 }
