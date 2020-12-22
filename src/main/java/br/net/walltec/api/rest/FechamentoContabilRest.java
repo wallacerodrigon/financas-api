@@ -4,19 +4,26 @@
 package br.net.walltec.api.rest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
+import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.FechamentoMensalDTO;
 import br.net.walltec.api.entidades.FechamentoContabil;
+import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.FechamentoContabilService;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
@@ -71,4 +78,23 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 			return super.salvar(fechamento);
 	}
 	
+	@GET
+	@Path("/por-mes-ano/mes/{mes}/ano/{ano}")
+	public RetornoRestDTO<FechamentoContabil> pesquisarPorMesAno(
+			@PathParam("mes") Integer mes,			
+			@PathParam("ano") Integer ano
+			) {
+		try {
+			FechamentoContabil fechamento = this.service.obterPorMesAno(ano, mes);
+			return new RetornoRestDTO<FechamentoContabil>().comEsteCodigo(Status.OK)
+					.comEsteRetorno(fechamento)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO<FechamentoContabil>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO<FechamentoContabil>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
 }

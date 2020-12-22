@@ -29,7 +29,7 @@ import lombok.Data;
 @Entity
 @Table(name="fechamentocontabil", schema=Constantes.SCHEMA_FINANCAS)
 @Cacheable
-@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage=CacheConcurrencyStrategy.TRANSACTIONAL)
 
 public class FechamentoContabil  extends EntidadeBasica<FechamentoContabil> {
 	

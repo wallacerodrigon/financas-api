@@ -58,10 +58,14 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	public boolean baixarParcelas(List<Integer> idsLancamentos) throws NegocioException {
 		
 		this.getLancamentosPorIds(idsLancamentos)
+		.stream()
+		.filter(lancamento -> !lancamento.isPago())
 		.forEach(lancamento -> {
 			lancamento.setDataHoraPagamento(LocalDateTime.now());
+			lancamento.setDataVencimentoString(UtilData.getDataFormatada(new Date()));
 			try {
 				this.alterar(lancamento);
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
