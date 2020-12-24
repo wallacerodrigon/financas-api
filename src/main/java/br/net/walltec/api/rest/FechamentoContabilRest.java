@@ -6,6 +6,7 @@ package br.net.walltec.api.rest;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,9 +43,7 @@ import io.swagger.annotations.Api;
 @Produces(value={MediaType.APPLICATION_JSON})
 @Consumes(value={MediaType.APPLICATION_JSON})
 @Interceptors({RequisicaoInterceptor.class})
-
 @Api(value="Webservice de fechamentos contábeis")
-
 @SuppressWarnings("serial")
 public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoContabil> {
 	
@@ -68,6 +67,7 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 		return FechamentoContabil.class;
 	}
 	
+	@PermitAll
 	@POST
 	@Path("/fechar-mes")
 	public RetornoRestDTO<FechamentoContabil> fecharMes(FechamentoMensalDTO dto) {
@@ -78,6 +78,7 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 			return super.salvar(fechamento);
 	}
 	
+	@PermitAll
 	@GET
 	@Path("/por-mes-ano/mes/{mes}/ano/{ano}")
 	public RetornoRestDTO<FechamentoContabil> pesquisarPorMesAno(

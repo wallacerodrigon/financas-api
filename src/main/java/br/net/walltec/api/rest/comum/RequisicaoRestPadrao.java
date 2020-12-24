@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.Dependent;
 import javax.interceptor.Interceptors;
@@ -100,6 +101,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	 * @see
 	 * br.net.walltec.api.rest.comum.ContratoPadraoRest#excluir(java.lang.Integer)
 	 */
+	@PermitAll
 	@Override
 	public RetornoRestDTO<T> excluir(@PathParam("idChaveObjeto") Integer idChaveObjeto) throws WebServiceException {
 
@@ -127,6 +129,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	 * br.net.walltec.api.rest.comum.ContratoPadraoRest#procurar(java.lang.Integer)
 	 */
 	@Override
+	@PermitAll
 	public RetornoRestDTO<T> procurar(@PathParam("idProcura") Integer idProcura) throws WebServiceException {
 		try {
 			T resultado = this.getServico().find(idProcura);
@@ -151,6 +154,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	 * br.net.walltec.api.rest.comum.ContratoPadraoRest#listar(java.lang.Integer,
 	 * java.lang.Integer)
 	 */
+	@PermitAll
 	@Override
 	public RetornoRestDTO<PageResponse<List<T>>> listar(@QueryParam("page") Integer page,
 			@QueryParam("size") Integer size) throws WebServiceException {
@@ -172,6 +176,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	 * @see
 	 * br.net.walltec.api.rest.comum.ContratoPadraoRest#salvar(java.lang.Object)
 	 */
+	@PermitAll
 	@Override
 	public RetornoRestDTO<T> salvar(T objeto) throws WebServiceException {
 		try {
@@ -195,6 +200,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	 * @see
 	 * br.net.walltec.api.rest.comum.ContratoPadraoRest#alterar(java.lang.Object)
 	 */
+	@PermitAll
 	@Override
 	public RetornoRestDTO<T> alterar(T objeto) throws WebServiceException {
 		try {
@@ -221,6 +227,7 @@ public abstract class RequisicaoRestPadrao<T> implements ContratoPadraoRest<T> {
 	// TODO: montar expressao regular com uma linguagem para poder fazer os filtros
 	// com: igual, like, likeInicio, likeFim, maiorQue, menorQue, entre, contem, E,
 	// OU, NAO, naoContem...
+	@PermitAll
 	@Override
 	public RetornoRestDTO<PageResponse<List<T>>> pesquisar(@QueryParam(value = "filtroJSON") String filtro,
 			@QueryParam(value = "page") Integer page, @QueryParam("size") Integer size) throws WebServiceException {
