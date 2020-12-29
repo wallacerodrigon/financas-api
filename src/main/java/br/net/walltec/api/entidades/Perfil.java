@@ -54,6 +54,10 @@ public class Perfil extends EntidadeBasica<Perfil> {
 	@Column(nullable=false)
 	private boolean bolAtivo;
 	
+	@NotNull(message="Informação se admin é obrigatorio")
+	@Column(nullable=false)
+	private boolean bolAdmin;	
+	
     @ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
     @JoinTable(name=Constantes.SCHEMA_FINANCAS+".perfilendpoint", 
