@@ -183,4 +183,8 @@ INSERT INTO financas.endpoint(
 ALTER TABLE ONLY financas.usuario
     ADD CONSTRAINT fk_perfil_usuario FOREIGN KEY (codperfil) REFERENCES financas.perfil(idperfil);
 	
-	
+--rever quando for para produção	
+insert into financas.perfilendpoint
+SELECT 2, idendpoint
+FROM financas.endpoint
+where idendpoint in (67,68,69,70,71,55,72,104,105,106,107,108,110,111,112,113,114,115,116,117,118)
