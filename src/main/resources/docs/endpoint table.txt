@@ -1,0 +1,190 @@
+-- Table: financas.perfilendpoint
+
+DROP TABLE financas.perfilendpoint;
+
+DROP TABLE financas.endpoint;
+
+--> faltou a sequence...
+
+
+CREATE SEQUENCE financas.endpoint_idendpoint_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+	
+CREATE TABLE financas.endpoint
+(
+    idendpoint integer NOT NULL DEFAULT nextval('financas.endpoint_idendpoint_seq'::regclass),
+    nomerecurso character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    nomeendpoint character varying(50) COLLATE pg_catalog."default" NOT NULL,
+	nomemetodo character varying(6) NOT NULL default 'get',
+    bolativo boolean NOT NULL DEFAULT true,
+    CONSTRAINT endpoint_pkey PRIMARY KEY (idendpoint)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE financas.endpoint
+    OWNER to wallace;
+COMMENT ON TABLE financas.endpoint
+    IS 'armazenamento dos endpoints do sistema';
+	
+	
+CREATE TABLE financas.perfilendpoint
+(
+    idperfil integer NOT NULL,
+    idendpoint integer NOT NULL,
+    CONSTRAINT perfilendpoint_pkey PRIMARY KEY (idperfil, idendpoint),
+    CONSTRAINT fk_perfilendpoint_endpoint FOREIGN KEY (idendpoint)
+        REFERENCES financas.endpoint (idendpoint) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_perfilendpoint_perfil FOREIGN KEY (idperfil)
+        REFERENCES financas.perfil (idperfil) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE financas.perfilendpoint
+    OWNER to wallace;
+COMMENT ON TABLE financas.perfilendpoint
+    IS 'relacionamento entre o perfil e os endpoints';
+
+-- Table: financas.endpoint
+	
+	
+--bancos	
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('bancos', '', 'get', true),
+	 ('bancos', '', 'delete', true),
+	 ('bancos', '', 'post', true),
+	 ('bancos', '', 'put', true),
+	 ('bancos', 'pesquisaSimples', 'get', true),
+	 ('bancos', '', 'ping', true);	
+	
+--usuarios	
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('usuarios', '', 'get', true),
+	 ('usuarios', '', 'delete', true),
+	 ('usuarios', '', 'post', true),
+	 ('usuarios', '', 'put', true),
+	 ('usuarios', 'pesquisaSimples', 'get', true),
+	 ('usuarios', '', 'ping', true);	
+	 
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('usuarios', 'efetuar-login', 'post', true),
+	 ('usuarios', 'refresh-token', 'post', true),
+	 ('usuarios', 'recuperar-senha', 'post', true),
+	 ('usuarios', 'alterar-senha', 'post', true),
+	 ('usuarios', 'efetuar-logout', 'post', true);	 
+	
+--tipos de lançamento
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('tipos-lancamentos', '', 'get', true),
+	 ('tipos-lancamentos', '', 'delete', true),
+	 ('tipos-lancamentos', '', 'post', true),
+	 ('tipos-lancamentos', '', 'put', true),
+	 ('tipos-lancamentos', 'pesquisaSimples', 'get', true),
+	 ('tipos-lancamentos', '', 'ping', true);	
+	
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('perfis', '', 'get', true),
+	 ('perfis', '', 'delete', true),
+	 ('perfis', '', 'post', true),
+	 ('perfis', '', 'put', true),
+	 ('perfis', 'pesquisaSimples', 'get', true),
+	 ('perfis', '', 'ping', true);		
+
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('fechamentos-contabeis', '', 'get', true),
+	 ('fechamentos-contabeis', '', 'delete', true),
+	 ('fechamentos-contabeis', '', 'post', true),
+	 ('fechamentos-contabeis', '', 'put', true),
+	 ('fechamentos-contabeis', 'pesquisaSimples', 'get', true),
+	 ('fechamentos-contabeis', '', 'ping', true);	
+
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('fechamentos-contabeis', 'fechar-mes', 'post', true),
+	 ('fechamentos-contabeis', 'por-mes-ano/mes/', 'get', true);
+	
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('endpoints', '', 'get', true),
+	 ('endpoints', '', 'delete', true),
+	 ('endpoints', '', 'post', true),
+	 ('endpoints', '', 'put', true),
+	 ('endpoints', 'pesquisaSimples', 'get', true),
+	 ('endpoints', '', 'ping', true);		
+
+
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('depara-historicos-bancos', '', 'get', true),
+	 ('depara-historicos-bancos', '', 'delete', true),
+	 ('depara-historicos-bancos', '', 'post', true),
+	 ('depara-historicos-bancos', '', 'put', true),
+	 ('depara-historicos-bancos', 'pesquisaSimples', 'get', true),
+	 ('depara-historicos-bancos', '', 'ping', true);		
+
+
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('lancamentos', '', 'get', true),
+	 ('lancamentos', '', 'delete', true),
+	 ('lancamentos', '', 'post', true),
+	 ('lancamentos', '', 'put', true),
+	 ('lancamentos', 'pesquisaSimples', 'get', true),
+	 ('lancamentos', '', 'ping', true);		
+
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('lancamentos', 'filtrar/mes/', 'get', true),
+	 ('lancamentos', 'excluir-lote', 'post', true),
+	 ('lancamentos', 'baixar-lote', 'put', true),
+	 ('lancamentos', 'importar-arquivo', 'post', true),
+	 ('lancamentos', 'download-documento', 'get', true),
+	 ('lancamentos', 'gerar-lote', 'post', true),		
+	 ('lancamentos', 'totalizador/resumo-anual', 'get', true),
+	 ('lancamentos', 'totalizador/por-mes-ano', 'get', true);
+
+
+--perfis
+INSERT INTO financas.endpoint(
+	nomerecurso, nomeendpoint, nomemetodo, bolativo)
+	VALUES ('formas-pagamento', '', 'get', true),
+	 ('formas-pagamento', '', 'delete', true),
+	 ('formas-pagamento', '', 'post', true),
+	 ('formas-pagamento', '', 'put', true),
+	 ('formas-pagamento', 'pesquisaSimples', 'get', true),
+	 ('formas-pagamento', '', 'ping', true);		
+
+
+ALTER TABLE ONLY financas.usuario
+    ADD CONSTRAINT fk_perfil_usuario FOREIGN KEY (codperfil) REFERENCES financas.perfil(idperfil);
+	
+--rever quando for para produção	
+insert into financas.perfilendpoint
+SELECT 2, idendpoint
+FROM financas.endpoint
+where idendpoint in (67,68,69,70,71,55,72,104,105,106,107,108,110,111,112,113,114,115,116,117,118)

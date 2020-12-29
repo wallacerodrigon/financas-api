@@ -35,6 +35,7 @@ import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
 import br.net.walltec.api.rest.comum.RetornoRestDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
+import br.net.walltec.api.utilitarios.UtilData;
 import io.swagger.annotations.Api;
 
 
@@ -98,6 +99,9 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	public RetornoRestDTO<PageResponse<List<Lancamento>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
 		try {
 			PageResponse<List<Lancamento>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
+			
+			listaLancamentos.getResultado().stream().forEach(lanc -> lanc.setDataVencimentoString(UtilData.getDataFormatada(UtilData.asDate(lanc.getDataVencimento()))));
+			
 			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(listaLancamentos)
 					.construir();
