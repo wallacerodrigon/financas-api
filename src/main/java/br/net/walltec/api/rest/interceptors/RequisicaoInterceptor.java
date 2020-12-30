@@ -55,7 +55,7 @@ public class RequisicaoInterceptor {
 				if (!contexto.getMethod().isAnnotationPresent(PermitAll.class)) {
 					String token = recuperarToken(headers);
 					validarToken(token, contexto); // valida autenticação
-					validarAutorizacao(token, target); // valida autorização
+					validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 
 				}
 				log.info("Finalizando interceptor");
@@ -80,7 +80,7 @@ public class RequisicaoInterceptor {
 	 * @param target
 	 * @throws NegocioException
 	 */
-	private void validarAutorizacao(String token, RequisicaoRestPadrao target) throws NegocioException {
+	private void validarAutorizacao(String token, RequisicaoRestPadrao target, Method metodoClasseRest) throws NegocioException {
 			TokenManager tokenManager = new TokenManager();
 			UsuarioLogadoDTO usuarioDto = tokenManager.getUsuarioFromToken(token);
 			
@@ -88,7 +88,7 @@ public class RequisicaoInterceptor {
 			
 			if (!perfilDoUsuario.isBolAdmin()) {
 				String recurso = target.getRequest().getRequestURI().split("rest")[1].split("\\/")[1];
-				String nomeEndPoint = "";//target.getRequest().getRequestURI().split("rest")[1];
+				String nomeEndPoint = metodoClasseRest.getName();
 				String metodo = target.getRequest().getMethod();
 				
 				perfilDoUsuario.getListaEndpoints()
