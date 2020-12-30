@@ -60,7 +60,7 @@ public abstract class AbstractCrudServicePadrao<T> implements CrudPadraoService<
 	public abstract PersistenciaPadraoDao<T> getDao();
 
 	@Override
-	@Transactional(value=TxType.REQUIRES_NEW)		
+	@Transactional(value=TxType.REQUIRED)		
 	public void alterar(T objeto) throws NegocioException {
 		try {
 			getDao().alterar((objeto));

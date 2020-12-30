@@ -1,8 +1,7 @@
 package br.net.walltec.api.entidades;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,9 +46,10 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@NotNull(message="Tipo lançamento é obrigatório")
 	private TipoLancamento tipoLancamento;
 	 
+	@Temporal(TemporalType.DATE)
 	@Column(nullable=false)
 	@NotNull(message="Data de vencimento é obrigatório")
-	private LocalDate dataVencimento;
+	private Date dataVencimento;
 	 
 	@Column(precision=2, nullable=false)
 	@NotNull(message="Valor do lançamento é obrigatório")
@@ -68,7 +68,8 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@Column(nullable=false)
 	private String descLancamento;
 
-	private LocalDateTime dataHoraPagamento;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dataHoraPagamento;
 
 	@ManyToOne
 	@JoinColumn(name="numbanco")
@@ -76,7 +77,8 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	
 	private String numDocumento;
 	
-	private LocalDateTime dataHoraConciliacao;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dataHoraConciliacao;
 	
 	@Transient
 	@NotNull(message="Data de vencimento é obrigatório")
