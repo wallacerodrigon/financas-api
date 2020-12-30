@@ -67,7 +67,6 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 		return FechamentoContabil.class;
 	}
 	
-	@PermitAll
 	@POST
 	@Path("/fechar-mes")
 	public RetornoRestDTO<FechamentoContabil> fecharMes(FechamentoMensalDTO dto) {
@@ -78,7 +77,6 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 			return super.salvar(fechamento);
 	}
 	
-	@PermitAll
 	@GET
 	@Path("/por-mes-ano/mes/{mes}/ano/{ano}")
 	public RetornoRestDTO<FechamentoContabil> pesquisarPorMesAno(

@@ -53,7 +53,7 @@ public class PerfilRest extends RequisicaoRestPadrao<Perfil> {
 	@Override
 	protected Class<Perfil> getClasseEntidade() {
 		// TODO Auto-generated method stub
-		return null;
+		return Perfil.class;
 	}
 	
 }

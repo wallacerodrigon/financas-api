@@ -4,6 +4,7 @@
 package br.net.walltec.api.rest;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -103,7 +104,7 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 	@ApiOperation("Serviço para refreshToken")
 	@POST
 	@Path("/refresh-token/{idUsuario}")
-	@PermitAll
+	@RolesAllowed(value = { Constantes.USUARIO_AUTENTICADO } )	
 	public RetornoRestDTO<RefreshTokenRetornoDTO> refreshToken(@PathParam("idUsuario") Integer idUsuario,
 			@CookieParam("refreshToken") String cookieRefresh) throws WebServiceException {
 		try {
@@ -216,7 +217,7 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 
 	@POST
 	@Path("/efetuar-logout/{idUsuario}")
-	@PermitAll
+	@RolesAllowed(value = { Constantes.USUARIO_AUTENTICADO } )
 	public RetornoRestDTO<UsuarioRetornoLoginDTO> efetuarLogout(@PathParam("idUsuario") Integer idUsuario)
 			throws WebServiceException {
 		try {

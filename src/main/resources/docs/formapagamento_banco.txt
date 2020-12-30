@@ -1,0 +1,6 @@
+alter table financas.banco add column idformapagamento integer not null default 34;
+
+ALTER TABLE ONLY financas.banco
+    ADD CONSTRAINT fk_formapagamento_banco FOREIGN KEY (idformapagamento) REFERENCES financas.formapagamento(idformapagamento);
+
+

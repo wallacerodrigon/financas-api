@@ -188,3 +188,7 @@ insert into financas.perfilendpoint
 SELECT 2, idendpoint
 FROM financas.endpoint
 where idendpoint in (67,68,69,70,71,55,72,104,105,106,107,108,110,111,112,113,114,115,116,117,118)
+
+alter table financas.perfil add boladmin boolean not null default false;
+
+

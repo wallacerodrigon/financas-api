@@ -54,5 +54,9 @@ public class Endpoint extends EntidadeBasica<Endpoint> {
 	
 	@NotNull(message="Status é obrigatório")
 	private Boolean bolAtivo;
+	
+	@NotNull(message="método é obrigatório")	
+	private String nomeMetodo;
+	
 
 }

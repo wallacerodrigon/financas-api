@@ -93,7 +93,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		return Lancamento.class;
 	}
 	
-	@PermitAll
 	@GET
 	@Path("/filtrar/mes/{mes}/ano/{ano}")
 	public RetornoRestDTO<PageResponse<List<Lancamento>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
@@ -114,7 +113,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		}
 	}
 
-	@PermitAll
 	@POST
 	@Path("/excluir-lote")
 	public RetornoRestDTO excluirEmLote(List<Integer> idsLancamentos) {
@@ -131,7 +129,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		}
 	}
 	
-	@PermitAll
 	@PUT
 	@Path("/baixar-lote")
 	public RetornoRestDTO baixarEmLote(List<Integer> idsLancamentos) {
@@ -190,7 +187,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		//forma de pagamento
 	}
 	
-	@PermitAll
 	@Override
 	public RetornoRestDTO<Lancamento> salvar(Lancamento objeto) throws WebServiceException {
 		String[] dadosDataVencimento = objeto.getDataVencimentoString().split("-");
