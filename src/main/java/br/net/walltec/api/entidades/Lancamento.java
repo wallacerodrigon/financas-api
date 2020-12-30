@@ -18,6 +18,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import br.net.walltec.api.entidades.comum.EntidadeBasica;
 import br.net.walltec.api.utilitarios.Constantes;
 import lombok.Data;
@@ -25,6 +27,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name="lancamento", schema=Constantes.SCHEMA_FINANCAS)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Lancamento extends EntidadeBasica<Lancamento> {
 	
 	

@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import br.net.walltec.api.dto.LoginUsuarioDto;
+import br.net.walltec.api.dto.UsuarioLogadoDTO;
 import br.net.walltec.api.dto.UsuarioRetornoLoginDTO;
 import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.NegocioException;
@@ -36,6 +37,7 @@ import br.net.walltec.api.rest.comum.RetornoRestDTO;
 import br.net.walltec.api.rest.dto.AlteracaoSenhaDto;
 import br.net.walltec.api.rest.dto.RefreshTokenRetornoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
+import br.net.walltec.api.tokens.TokenManager;
 import br.net.walltec.api.utilitarios.Constantes;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -86,6 +88,10 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 			if (!this.isLocalHost()) {
 				this.gerarCookieRefreshToken(recuperaUsuarioPorLoginSenha.getRefreshToken());
 				recuperaUsuarioPorLoginSenha.setRefreshToken(null);
+			} else {
+				UsuarioLogadoDTO usuarioDto = new TokenManager().getUsuarioFromToken(recuperaUsuarioPorLoginSenha.getAccessToken());
+				Usuario usuario = this.servico.find(usuarioDto.getIdUsuario());
+				recuperaUsuarioPorLoginSenha.setAccessToken(new TokenManager().gerarToken(usuario, Constantes.INTERVALO_TOKEN * 10000));				
 			}
 			return new RetornoRestDTO<UsuarioRetornoLoginDTO>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(recuperaUsuarioPorLoginSenha).construir();
@@ -122,6 +128,11 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 			if (!this.isLocalHost()) {
 				this.gerarCookieRefreshToken(geraAccessToken.getRefreshToken());
 				geraAccessToken.setRefreshToken(null);
+			} else {
+				UsuarioLogadoDTO usuarioDto = new TokenManager().getUsuarioFromToken(geraAccessToken.getAccessToken());
+				Usuario usuario = this.servico.find(usuarioDto.getIdUsuario());
+				geraAccessToken.setAccessToken(new TokenManager().gerarToken(usuario, Constantes.INTERVALO_TOKEN * 10000));				
+				
 			}
 			return new RetornoRestDTO<RefreshTokenRetornoDTO>().comEsteCodigo(Status.OK).comEsteRetorno(geraAccessToken)
 					.construir();
