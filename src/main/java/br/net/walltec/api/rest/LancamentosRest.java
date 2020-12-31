@@ -187,52 +187,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		//forma de pagamento
 	}
 	
-	@Override
-	public RetornoRestDTO<Lancamento> salvar(Lancamento objeto) throws WebServiceException {
-		//String[] dadosDataVencimento = objeto.getDataVencimentoString().split("-");
-
-		objeto.setDataVencimento( UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
-		
-		
-		if (objeto.getDataHoraPagamentoString() != null) {
-//			String[] dadosDataPagamento = objeto.getDataHoraPagamentoString().split("-");
-//			String[] dadosHorario = dadosDataPagamento[2].split(" ")[1].split(":");
-					
-			
-			objeto.setDataHoraPagamento(
-					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO)
-//					LocalDateTime.of(
-//						Integer.valueOf(dadosDataVencimento[0]).intValue(), 
-//						Integer.valueOf(dadosDataVencimento[1]).intValue(), 
-//						Integer.valueOf(dadosDataVencimento[2].split(" ")[0]).intValue(),
-//						Integer.valueOf(dadosHorario[0]),
-//						Integer.valueOf(dadosHorario[1])
-//					)
-			);
-		}
-		
-		return super.salvar(objeto);
-	}
-	
-	@Override
-	public RetornoRestDTO<Lancamento> alterar(Lancamento objeto) throws WebServiceException {
-		Lancamento l = null;
-		try {
-			l = this.servico.find(objeto.getIdLancamento());
-			l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
-			if (objeto.getDataHoraPagamentoString() != null) {
-				l.setDataHoraPagamento(
-						UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
-			}
-			return super.alterar(l);
-		} catch (NegocioException e) {
-			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
-					.construir();
-		} catch (Exception e) {
-			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
-					.construir();
-		}
-	}
 	
 }
 

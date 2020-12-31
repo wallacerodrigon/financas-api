@@ -1,6 +1,5 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -15,7 +14,6 @@ import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
-import br.net.walltec.api.excecoes.PersistenciaException;
 import br.net.walltec.api.negocio.servicos.AbstractCrudServicePadrao;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.persistencia.dao.FechamentoContabilDao;
@@ -126,6 +124,48 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		try {
 			return lancamentoDao.listarParcelas(dataInicial, dataFinal);
+		} catch (Exception e) {
+			throw new NegocioException(e);
+		}
+	}
+	
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
+	@Override
+	public void alterar(Lancamento objeto) throws NegocioException {
+		// TODO Auto-generated method stub
+		Lancamento l = this.find(objeto.getIdLancamento());
+		l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
+		if (objeto.getDataHoraPagamentoString() != null) {
+			l.setDataHoraPagamento(
+					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
+		}
+		
+		if (l.isPago()) {
+			throw new NegocioException("Lançamento pago, não pode ser alterado.");
+		}
+		
+		try {
+			l.setFormaPagamento(objeto.getFormaPagamento());
+			l.setDataVencimentoString(objeto.getDataVencimentoString());
+			l.setDescLancamento(objeto.getDescLancamento());
+			l.setValorLancamento(objeto.getValorLancamento());
+			this.lancamentoDao.alterar(l);
+		} catch (Exception e) {
+			throw new NegocioException(e);
+		}
+	}
+	
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
+	@Override
+	public void incluir(Lancamento objeto) throws NegocioException {
+		// TODO Auto-generated method stub
+		objeto.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
+		if (objeto.getDataHoraPagamentoString() != null) {
+			objeto.setDataHoraPagamento(
+					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
+		}
+		try {
+			this.lancamentoDao.incluir(objeto);
 		} catch (Exception e) {
 			throw new NegocioException(e);
 		}
