@@ -5,13 +5,18 @@ package br.net.walltec.api.entidades;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import br.net.walltec.api.entidades.comum.EntidadeBasica;
 import br.net.walltec.api.utilitarios.Constantes;
@@ -41,4 +46,8 @@ public class Banco extends EntidadeBasica<Banco> {
 	@Size(min=3, max=50, message="Sigla do banco deve ter entre {min} e {max} caracteres")
 	private String nomeSigla;
 
+	@JoinColumn(name = "idformapagamento")
+	@ManyToOne(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
+	private FormaPagamento formaPagamentoParaConciliacao;
 }
