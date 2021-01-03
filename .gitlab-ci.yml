@@ -2,10 +2,12 @@ stages:
   - build
   - deploy
 
-image: maven:3.6.1-jdk-8
+
 
 variables:
   DIR_FONTES: "/builds/wallace-sousa/financas-api"
+
+image: maven:3.6.1-jdk-8
 
 cache:
   paths:
