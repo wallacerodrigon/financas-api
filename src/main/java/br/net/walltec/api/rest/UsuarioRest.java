@@ -110,7 +110,9 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 	@ApiOperation("Serviço para refreshToken")
 	@POST
 	@Path("/refresh-token/{idUsuario}")
-	@RolesAllowed(value = { Constantes.USUARIO_AUTENTICADO } )	
+	@PermitAll
+
+	//@RolesAllowed(value = { Constantes.USUARIO_AUTENTICADO } )	
 	public RetornoRestDTO<RefreshTokenRetornoDTO> refreshToken(@PathParam("idUsuario") Integer idUsuario,
 			@CookieParam("refreshToken") String cookieRefresh) throws WebServiceException {
 		try {
