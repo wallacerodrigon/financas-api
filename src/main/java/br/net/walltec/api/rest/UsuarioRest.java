@@ -210,7 +210,7 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 		c.setDomain(domain);
 		c.setHttpOnly(true);
 		c.setMaxAge(2592000);
-		c.setSecure(ehHttps);
+		//c.setSecure(ehHttps);
 		c.setPath(path);
 		this.getResponse().addCookie(c);
 		return c;
