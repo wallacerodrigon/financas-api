@@ -54,16 +54,19 @@ public class RequisicaoInterceptor {
 				RequisicaoRestPadrao target = (RequisicaoRestPadrao) contexto.getTarget();
 				HttpHeaders headers = target.getHeaders();
 				if (!contexto.getMethod().isAnnotationPresent(PermitAll.class)) {
+					
+					boolean deveEstarSoAutenticado = contexto.getMethod().isAnnotationPresent(RolesAllowed.class) &&
+							contexto.getMethod().getAnnotation(RolesAllowed.class).value().toString().indexOf(Constantes.USUARIO_AUTENTICADO) > -1;
+					
 					String token = recuperarToken(headers);
-					validarToken(token, contexto); // valida autenticação
-					validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+									
+					if (!deveEstarSoAutenticado) {
+						validarToken(token, contexto); // valida autenticação
+						validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+					}
+					
 
-				} else if (contexto.getMethod().isAnnotationPresent(RolesAllowed.class) &&
-						contexto.getMethod().getAnnotation(RolesAllowed.class).value().toString().indexOf(Constantes.USUARIO_AUTENTICADO) > -1
-						) {
-					//verifica se tem o token para fazer o refresh, caso contrário, gerará erro NegocioException
-					recuperarToken(headers);
-				}
+				} 
 				log.info("Finalizando interceptor");
 				return contexto.proceed();
 			} else {
