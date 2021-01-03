@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.interceptor.AroundInvoke;
@@ -57,6 +58,11 @@ public class RequisicaoInterceptor {
 					validarToken(token, contexto); // valida autenticação
 					validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 
+				} else if (contexto.getMethod().isAnnotationPresent(RolesAllowed.class) &&
+						contexto.getMethod().getAnnotation(RolesAllowed.class).value().toString().indexOf(Constantes.USUARIO_AUTENTICADO) > -1
+						) {
+					//verifica se tem o token para fazer o refresh, caso contrário, gerará erro NegocioException
+					recuperarToken(headers);
 				}
 				log.info("Finalizando interceptor");
 				return contexto.proceed();
