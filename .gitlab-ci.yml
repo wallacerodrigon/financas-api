@@ -1,18 +1,39 @@
+stages:
+  - build
+  - deploy
+
 image: maven:3.6.1-jdk-8
+
+variables:
+  DIR_FONTES: "/builds/wallace-sousa/financas-api"
 
 cache:
   paths:
     - .m2/repository/
     - target/
 
+
+BuildFinancas:
+  stage: build
+  environment:
+    name: Homolog
+  script:
+   - apt-get update -y && apt-get install lftp -y
+    - mvn clean install
+  artifacts:
+    paths:
+      - $DIR_FONTES/target/financas-api.war
+  allow_failure: false  
+  only:
+    - develop
+
 deploy:
   stage: deploy
-  before_script:
-   - apt-get update -y && apt-get install lftp -y
   script:
-    - echo "testando..."
-    - mvn clean install
+    - echo "deploying..."
     - lftp -e "open ftp://184.107.54.145; set ssl:verify-certificate no;  user $FTP_USERNAME $FTP_PASSWORD; put -O appservers/wildfly-11.0.0.Final/standalone/deployments/ /builds/wallacerodrigon/financas-api/target/financas-api.war; bye"
   allow_failure: false     
   only:
-    - develop
+    - master
+  dependencies:
+    - BuildFinancas
