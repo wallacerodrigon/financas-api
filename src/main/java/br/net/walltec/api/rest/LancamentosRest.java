@@ -3,14 +3,10 @@
  */
 package br.net.walltec.api.rest;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
@@ -25,7 +21,6 @@ import javax.ws.rs.core.Response.Status;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
-import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
 import br.net.walltec.api.importacao.estrategia.ImportadorBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
@@ -34,6 +29,7 @@ import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
 import br.net.walltec.api.rest.comum.RetornoRestDTO;
+import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.UtilData;
 import io.swagger.annotations.Api;
@@ -146,8 +142,8 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	}
 
 	@POST
-	@Path("/importar-arquivo")
-	public void importarArquivo() {
+	@Path("/importar-arquivo-bancario")
+	public void importarArquivo(ImportadorArquivoDTO importador) {
 		
 	}
 	
