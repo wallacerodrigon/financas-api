@@ -1,5 +1,6 @@
 package br.net.walltec.api.importacao.estrategia;
 
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,10 +10,14 @@ import java.util.List;
 import javax.enterprise.inject.spi.CDI;
 
 import br.net.walltec.api.dto.RegistroExtratoDto;
-import br.net.walltec.api.entidades.DeparaHistoricoBanco;
+import br.net.walltec.api.entidades.Banco;
+import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.negocio.servicos.BancoService;
 import br.net.walltec.api.negocio.servicos.DeparaHistoricoBancoService;
+import br.net.walltec.api.negocio.servicos.TipoLancamentoService;
 import br.net.walltec.api.utilitarios.UtilData;
 
 public class ImportadorCSVBB implements ImportadorArquivo {
@@ -22,6 +27,10 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 	private static final int NUM_BB = 1;
 
 	private DeparaHistoricoBancoService deparaServico;
+	
+	private BancoService bancoService;
+	
+	private TipoLancamentoService tipoLancamentoService;
 
 	/* (non-Javadoc)
 	 * @see br.net.walltec.api.importacao.estrategia.ImportadorArquivo#importar(java.lang.String, byte[], java.util.List)
@@ -53,6 +62,14 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 		String[] dados = new String(dadosArquivo, Charset.forName(CHARSET_8859_1)).split("\n");
 		
 		int numLinha = 0;
+		bancoService =  CDI.current().select(BancoService.class).get();
+		Banco banco = bancoService.find(1);
+		FormaPagamento formaPagamento = banco.getFormaPagamentoParaConciliacao();
+		
+		tipoLancamentoService =  CDI.current().select(TipoLancamentoService.class).get();
+
+		TipoLancamento tipoLancamento = tipoLancamentoService.find(1);
+		
 		List<Lancamento> lancamentos = new ArrayList<Lancamento>();
 		for(String dado : dados) {
 			
@@ -64,29 +81,20 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 			String dadosDaLinha[] = linha2.split(",");
 			
 			Date dataVencimento = UtilData.getDataPorPattern(dadosDaLinha[0].replace("\"", ""), DATA);
-			//String dataVencimentoStr = getDataFormatoString(dataVencimento, DATA);
+			Double valor = Double.valueOf(dadosDaLinha[5]);
 			
-			//String conta = dadosDaLinha[5].startsWith("-") ? Constantes.ID_CONTA_DEBITO.toString() : Constantes.ID_CONTA_CREDITO.toString();
-			//String valor = dadosDaLinha[5].replaceAll("[-]", "");
-			
-			//DeparaHistoricoBancoVO depara = recuperarDepara(dadosDaLinha[2], listaDeparas);
-			
-//			LancamentoVO vo = new LancamentoVO();
-//			vo.setBolConciliado(true);
-//			vo.setBolPaga(true);
-//			vo.setDataVencimentoStr( dataVencimentoStr );
-//			vo.setIdFormaPagamento(Constantes.ID_FORMA_PAGAMENTO_DEBITO);
-//			vo.setDescricao(UtilObjeto.isNotVazio(depara) ? depara.getNomeDestino() : dadosDaLinha[2]);
-//			vo.setDescConta(vo.getDescricao());
-//			vo.setDespesa(conta.equals(Constantes.ID_CONTA_DEBITO.toString()));
-//			vo.setIdConta(Integer.valueOf(conta));
-//			vo.setNumDocumento(dadosDaLinha[4]);
-//			vo.setNumero(Short.valueOf("1"));
-//			vo.setValorDebitoStr(valor);
-//			vo.setValorCreditoStr(valor);
-//			vo.setValor(Double.valueOf(valor));
-//			
-			//lancamentos.add(vo);
+			Lancamento lancamento = new Lancamento();
+			lancamento.setDataHoraConciliacao(new Date());
+			lancamento.setBanco(banco);
+			lancamento.setDataHoraPagamento(dataVencimento);
+			lancamento.setDataVencimento(dataVencimento);
+			lancamento.setDescLancamento(dadosDaLinha[2]);
+			lancamento.setFormaPagamento(formaPagamento);
+			lancamento.setLancamentoOrigem(null);
+			lancamento.setNumDocumento(dadosDaLinha[4]);
+			lancamento.setTipoLancamento(tipoLancamento);
+			lancamento.setValorLancamento(BigDecimal.valueOf(valor));
+
 			
 			++numLinha;
 		}
