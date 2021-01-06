@@ -9,4 +9,6 @@ import br.net.walltec.api.excecoes.NegocioException;
 public interface ImportadorArquivo {
 
     List<RegistroExtratoDto> importar(String nomeArquivo, byte[] dadosArquivo, List<Lancamento> listaParcelas) throws NegocioException;
+    
+    boolean isExtensaoValida(String extensao);
 }

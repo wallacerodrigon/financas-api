@@ -29,8 +29,8 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 	@Override
 	public List<RegistroExtratoDto> importar(String nomeArquivo, byte[] dadosArquivo, List<Lancamento> listaParcelas)
 			throws NegocioException {
-		deparaServico =  CDI.current().select(DeparaHistoricoBancoService.class).get();
-		List<DeparaHistoricoBanco> listaDeparas = this.deparaServico.listaPorBanco(1);
+		//deparaServico =  CDI.current().select(DeparaHistoricoBancoService.class).get();
+		//List<DeparaHistoricoBanco> listaDeparas = this.deparaServico.listaPorBanco(1);
 		List<Lancamento> lancamentosConvertidos = this.recuperarListaLancamento(dadosArquivo);
 //		Date dataBase = listaVOs.size() > 1 ? UtilData.getData(listaVOs.get(1).getDataVencimentoStr(), "/") : new Date();
 //		Date dataInicio = UtilData.getPrimeiroDiaMes(dataBase);
@@ -105,5 +105,10 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 //				.findFirst()
 //				.orElse(null);
 //	}
+
+	@Override
+	public boolean isExtensaoValida(String extensao) {
+		return extensao.equalsIgnoreCase("csv");
+	}
 	
 }

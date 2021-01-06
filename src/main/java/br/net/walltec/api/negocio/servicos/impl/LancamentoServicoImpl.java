@@ -18,21 +18,16 @@ import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
-import br.net.walltec.api.importacao.estrategia.ImportadorBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCefTxt;
 import br.net.walltec.api.negocio.servicos.AbstractCrudServicePadrao;
 import br.net.walltec.api.negocio.servicos.FechamentoContabilService;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
-import br.net.walltec.api.persistencia.dao.FechamentoContabilDao;
-import br.net.walltec.api.persistencia.dao.FormaPagamentoDao;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.utilitarios.UtilBase64;
-import br.net.walltec.api.utilitarios.UtilCriptografia;
 import br.net.walltec.api.utilitarios.UtilData;
-import br.net.walltec.api.utilitarios.UtilFormatador;
 import br.net.walltec.api.utilitarios.UtilObjeto;
 
 @Named
@@ -210,7 +205,12 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		byte[] conteudoArquivo = UtilBase64.decodificarBase64(importadorDto.getDadosArquivoBase64());
 		PageResponse<List<Lancamento>> filtroLancamentos = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
 		List<Lancamento> lancamentosDoMes = filtroLancamentos.getResultado();
-		this.mapImportadores.get(chaveImportador).importar(importadorDto.getNomeArquivo(), conteudoArquivo, lancamentosDoMes);
+		ImportadorArquivo importador = this.mapImportadores.get(chaveImportador);
+		
+		if (! importador.isExtensaoValida(importadorDto.getExtensaoArquivo())) {
+			throw new NegocioException("Extensão inválida para esse banco.");
+		}
+		importador.importar(importadorDto.getNomeArquivo(), conteudoArquivo, lancamentosDoMes);
 	}
 
 	
