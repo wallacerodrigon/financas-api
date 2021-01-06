@@ -62,11 +62,12 @@ public class RequisicaoInterceptor {
 									
 					if (!deveEstarSoAutenticado) {
 						validarToken(token, contexto); // valida autenticação
-						validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+//						validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 					}
 					
 
 				} 
+
 				log.info("Finalizando interceptor");
 				return contexto.proceed();
 			} else {

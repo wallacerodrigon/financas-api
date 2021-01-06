@@ -112,5 +112,11 @@ public class ImportadorCefTxt implements ImportadorArquivo {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean isExtensaoValida(String extensao) {
+		// TODO Auto-generated method stub
+		return extensao.equalsIgnoreCase("txt");
+	}
 		
 }
