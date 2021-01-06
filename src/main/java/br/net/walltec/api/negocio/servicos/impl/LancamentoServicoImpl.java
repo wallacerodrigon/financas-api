@@ -135,13 +135,15 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		// TODO Auto-generated method stub
 		Lancamento l = this.find(objeto.getIdLancamento());
 		l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
-		if (objeto.getDataHoraPagamentoString() != null) {
-			l.setDataHoraPagamento(
-					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
-		}
+		
 		
 		if (l.isPago()) {
 			throw new NegocioException("Lançamento pago, não pode ser alterado.");
+		}
+		
+		if (objeto.getDataHoraPagamentoString() != null) {
+			l.setDataHoraPagamento(
+					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
 		}
 		
 		try {
