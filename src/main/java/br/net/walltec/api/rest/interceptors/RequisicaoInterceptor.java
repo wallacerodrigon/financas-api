@@ -55,7 +55,7 @@ public class RequisicaoInterceptor {
 				if (!contexto.getMethod().isAnnotationPresent(PermitAll.class)) {
 					String token = recuperarToken(headers);
 					validarToken(token, contexto); // valida autenticação
-					validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+					//validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 
 				}
 				log.info("Finalizando interceptor");
