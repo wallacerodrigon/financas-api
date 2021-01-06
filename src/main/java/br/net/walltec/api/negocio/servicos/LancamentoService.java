@@ -23,6 +23,7 @@ import br.net.walltec.api.entidades.DeparaHistoricoBanco;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
+import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.filtro.DesfazimentoConciliacaoDTO;
 import br.net.walltec.api.rest.dto.filtro.RegistroFechamentoMesDTO;
 
@@ -38,4 +39,5 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 	
 	PageResponse<List<Lancamento>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException;
 	
+	void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException;
 }

@@ -16,4 +16,6 @@ public class ImportadorArquivoDTO implements Serializable {
 	private String dadosArquivoBase64;
 	
 	private String extensaoArquivo;
+	
+	private String nomeArquivo;
 }

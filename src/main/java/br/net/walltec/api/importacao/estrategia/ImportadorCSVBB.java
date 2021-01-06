@@ -1,12 +1,19 @@
 package br.net.walltec.api.importacao.estrategia;
 
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.enterprise.inject.spi.CDI;
+
 import br.net.walltec.api.dto.RegistroExtratoDto;
+import br.net.walltec.api.entidades.DeparaHistoricoBanco;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.DeparaHistoricoBancoService;
-import br.net.walltec.api.negocio.servicos.LancamentoService;
+import br.net.walltec.api.utilitarios.UtilData;
 
 public class ImportadorCSVBB implements ImportadorArquivo {
 
@@ -14,8 +21,6 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 	private static final String CHARSET_8859_1 = "ISO-8859-1";	
 	private static final int NUM_BB = 1;
 
-	private LancamentoService servico;
-	
 	private DeparaHistoricoBancoService deparaServico;
 
 	/* (non-Javadoc)
@@ -24,76 +29,48 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 	@Override
 	public List<RegistroExtratoDto> importar(String nomeArquivo, byte[] dadosArquivo, List<Lancamento> listaParcelas)
 			throws NegocioException {
-		// TODO Auto-generated method stub
+		deparaServico =  CDI.current().select(DeparaHistoricoBancoService.class).get();
+		List<DeparaHistoricoBanco> listaDeparas = this.deparaServico.listaPorBanco(1);
+		List<Lancamento> lancamentosConvertidos = this.recuperarListaLancamento(dadosArquivo);
+//		Date dataBase = listaVOs.size() > 1 ? UtilData.getData(listaVOs.get(1).getDataVencimentoStr(), "/") : new Date();
+//		Date dataInicio = UtilData.getPrimeiroDiaMes(dataBase);
+//		listaVOs.get(0).setDataVencimentoStr( UtilData.getDataFormatada(dataInicio, "dd/MM/yyyy") );
+//		listaVOs.remove(listaVOs.size() -1);
 		return null;
 	}
 	
-//	/**
-//	 * @return Retorna a data no formato dd/mm/yyyy.
-//	 */
-//	public static String getDataFormatoString(Date data) {
-//		return data==null ? null : new SimpleDateFormat(DATA).format(data);
-//	}
-//
-//	/**
-//	 * @return Retorna a data no formato dd/mm/yyyy.
-//	 */
-//	public static String getDataFormatoString(Date data, String formato) {
-//		return new SimpleDateFormat(formato).format(data);
-//	}
-//	
-//	/* (non-Javadoc)
-//	 * @see br.net.walltec.api.importacao.estrategia.ImportadorArquivo#importar(java.lang.String, byte[], java.util.List)
-//	 */
-//	@Override
-//	public List<RegistroExtratoDto> importar(String nomeArquivo, byte[] dadosArquivo, List<LancamentoVO> listaParcelas)
-//			throws NegocioException {
-//			DeparaHistoricoBancoVO objetoFiltro = new DeparaHistoricoBancoVO();
-//			objetoFiltro.setNumBanco(1);
-//			
-//			deparaServico =  CDI.current().select(DeparaHistoricoBancoServico.class).get();
-//			List<DeparaHistoricoBancoVO> listaDeparas = this.deparaServico.listaPorBanco(1);
-//			
-//			List<LancamentoVO> listaVOs = recuperarListaLancamentoVO(dadosArquivo, listaDeparas);
-//			servico =  CDI.current().select(LancamentoServico.class).get();
-//
-//			Date dataBase = listaVOs.size() > 1 ? UtilData.getData(listaVOs.get(1).getDataVencimentoStr(), "/") : new Date();
-//			Date dataInicio = UtilData.getPrimeiroDiaMes(dataBase);
-//			listaVOs.get(0).setDataVencimentoStr( UtilData.getDataFormatada(dataInicio, "dd/MM/yyyy") );
-//			listaVOs.remove(listaVOs.size() -1);
-//			
-//			return servico.conciliarLancamentos(listaVOs, listaDeparas, NUM_BB, dataBase);
-//
-//	}
-//
-//
-//
-//	/**
-//	 * @param dadosArquivo
-//	 * @param listaDeparas 
-//	 */
-//	private List<LancamentoVO> recuperarListaLancamentoVO(byte[] dadosArquivo, List<DeparaHistoricoBancoVO> listaDeparas) throws NegocioException {
-//		String[] dados = new String(dadosArquivo, Charset.forName(CHARSET_8859_1)).split("\n");
-//		
-//		int numLinha = 0;
-//		List<LancamentoVO> lancamentos = new ArrayList<LancamentoVO>();
-//		for(String dado : dados) {
-//			
-//			if (numLinha == 0) {
-//				++numLinha;
-//				continue;
-//			}
-//			String linha2 = dado.replaceAll("\"", "");
-//			String dadosDaLinha[] = linha2.split(",");
-//			
-//			Date dataVencimento = UtilData.getDataPorPattern(dadosDaLinha[0].replace("\"", ""), DATA);
-//			String dataVencimentoStr = getDataFormatoString(dataVencimento, DATA);
-//			
-//			String conta = dadosDaLinha[5].startsWith("-") ? Constantes.ID_CONTA_DEBITO.toString() : Constantes.ID_CONTA_CREDITO.toString();
-//			String valor = dadosDaLinha[5].replaceAll("[-]", "");
-//			
-//			DeparaHistoricoBancoVO depara = recuperarDepara(dadosDaLinha[2], listaDeparas);
-//			
+	/**
+	 * @return Retorna a data no formato dd/mm/yyyy.
+	 */
+	public static String getDataFormatoString(Date data) {
+		return data==null ? null : new SimpleDateFormat(DATA).format(data);
+	}
+	/**
+	 * @param dadosArquivo
+	 * @param listaDeparas 
+	 */
+	private List<Lancamento> recuperarListaLancamento(byte[] dadosArquivo) throws NegocioException {
+		String[] dados = new String(dadosArquivo, Charset.forName(CHARSET_8859_1)).split("\n");
+		
+		int numLinha = 0;
+		List<Lancamento> lancamentos = new ArrayList<Lancamento>();
+		for(String dado : dados) {
+			
+			if (numLinha == 0) {
+				++numLinha;
+				continue;
+			}
+			String linha2 = dado.replaceAll("\"", "");
+			String dadosDaLinha[] = linha2.split(",");
+			
+			Date dataVencimento = UtilData.getDataPorPattern(dadosDaLinha[0].replace("\"", ""), DATA);
+			//String dataVencimentoStr = getDataFormatoString(dataVencimento, DATA);
+			
+			//String conta = dadosDaLinha[5].startsWith("-") ? Constantes.ID_CONTA_DEBITO.toString() : Constantes.ID_CONTA_CREDITO.toString();
+			//String valor = dadosDaLinha[5].replaceAll("[-]", "");
+			
+			//DeparaHistoricoBancoVO depara = recuperarDepara(dadosDaLinha[2], listaDeparas);
+			
 //			LancamentoVO vo = new LancamentoVO();
 //			vo.setBolConciliado(true);
 //			vo.setBolPaga(true);
@@ -109,12 +86,12 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 //			vo.setValorCreditoStr(valor);
 //			vo.setValor(Double.valueOf(valor));
 //			
-//			lancamentos.add(vo);
-//			
-//			++numLinha;
-//		}
-//		return lancamentos;
-//	}
+			//lancamentos.add(vo);
+			
+			++numLinha;
+		}
+		return lancamentos;
+	}
 //
 //	/**
 //	 * @param string

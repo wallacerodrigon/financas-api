@@ -1,7 +1,9 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -11,16 +13,26 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import br.net.walltec.api.comum.PageResponse;
+import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
+import br.net.walltec.api.importacao.estrategia.ImportadorBB;
+import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
+import br.net.walltec.api.importacao.estrategia.ImportadorCefTxt;
 import br.net.walltec.api.negocio.servicos.AbstractCrudServicePadrao;
+import br.net.walltec.api.negocio.servicos.FechamentoContabilService;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.persistencia.dao.FechamentoContabilDao;
 import br.net.walltec.api.persistencia.dao.FormaPagamentoDao;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
+import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
+import br.net.walltec.api.utilitarios.UtilBase64;
+import br.net.walltec.api.utilitarios.UtilCriptografia;
 import br.net.walltec.api.utilitarios.UtilData;
+import br.net.walltec.api.utilitarios.UtilFormatador;
 import br.net.walltec.api.utilitarios.UtilObjeto;
 
 @Named
@@ -31,10 +43,18 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	private LancamentoDao lancamentoDao;
 
 	@Inject
-	private FechamentoContabilDao fechamentoContabilDao;
+	private FechamentoContabilService fechamentoContabilService;
 
-	@Inject
-	private FormaPagamentoDao formaPagamentoDao;
+	
+	private static Map<String, ImportadorArquivo> mapImportadores = new HashMap<String, ImportadorArquivo>();
+
+	private static final String FILE_TYPE_CSV = "csv";
+	private static final String FILE_TYPE_TXT = "txt";
+	
+	static {
+		mapImportadores.put("1_"+FILE_TYPE_CSV, new ImportadorCSVBB());
+		mapImportadores.put("104_"+FILE_TYPE_TXT, new ImportadorCefTxt());
+	}
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -171,6 +191,26 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		} catch (Exception e) {
 			throw new NegocioException(e);
 		}
+	}
+
+
+
+	@Override
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
+	public void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException {
+		// TODO Auto-generated method stub
+		
+	    FechamentoContabil fechamentoContabil = fechamentoContabilService.obterPorMesAno(importadorDto.getAno(),  importadorDto.getMes());
+		
+	    if (fechamentoContabil != null) {
+	    	throw new NegocioException("Mês fechado, não poderá ter importação.");
+	    }
+	    
+		String chaveImportador = importadorDto.getNumBanco() +"_" + importadorDto.getExtensaoArquivo();
+		byte[] conteudoArquivo = UtilBase64.decodificarBase64(importadorDto.getDadosArquivoBase64());
+		PageResponse<List<Lancamento>> filtroLancamentos = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+		List<Lancamento> lancamentosDoMes = filtroLancamentos.getResultado();
+		this.mapImportadores.get(chaveImportador).importar(importadorDto.getNomeArquivo(), conteudoArquivo, lancamentosDoMes);
 	}
 
 	
