@@ -72,10 +72,9 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		this.getLancamentosPorIds(idsLancamentos)
 		.stream()
-		.filter(lancamento -> !lancamento.isPago())
 		.forEach(lancamento -> {
-			lancamento.setDataHoraPagamento(new Date());
-			lancamento.setDataVencimentoString(UtilData.getDataFormatada(new Date()));
+			lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(new Date(), UtilData.PATTERN_DATA_ISO )); 
+			lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
 			try {
 				this.alterar(lancamento);
 				
