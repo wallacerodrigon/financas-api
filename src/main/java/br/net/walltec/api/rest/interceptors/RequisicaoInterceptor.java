@@ -60,10 +60,10 @@ public class RequisicaoInterceptor {
 					
 					String token = recuperarToken(headers);
 									
-					if (!deveEstarSoAutenticado) {
+					//if (!deveEstarSoAutenticado) {
 						validarToken(token, contexto); // valida autenticação
 //						validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
-					}
+					//}
 					
 
 				} 
