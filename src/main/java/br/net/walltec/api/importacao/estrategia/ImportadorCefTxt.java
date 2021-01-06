@@ -2,7 +2,6 @@ package br.net.walltec.api.importacao.estrategia;
 
 import java.util.List;
 
-import br.net.walltec.api.dto.RegistroExtratoDto;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.DeparaHistoricoBancoService;
@@ -107,7 +106,7 @@ public class ImportadorCefTxt implements ImportadorArquivo {
 	 * @see br.net.walltec.api.importacao.estrategia.ImportadorArquivo#importar(java.lang.String, byte[], java.util.List)
 	 */
 	@Override
-	public List<RegistroExtratoDto> importar(String nomeArquivo, byte[] dadosArquivo, List<Lancamento> listaParcelas)
+	public List<Lancamento> importar(String nomeArquivo, byte[] dadosArquivo)
 			throws NegocioException {
 		// TODO Auto-generated method stub
 		return null;

@@ -1,5 +1,7 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,9 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import br.net.walltec.api.comum.PageResponse;
+import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
+import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
@@ -190,10 +194,8 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
-	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
 	public void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException {
-		// TODO Auto-generated method stub
-		
 	    FechamentoContabil fechamentoContabil = fechamentoContabilService.obterPorMesAno(importadorDto.getAno(),  importadorDto.getMes());
 		
 	    if (fechamentoContabil != null) {
@@ -202,14 +204,100 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	    
 		String chaveImportador = importadorDto.getNumBanco() +"_" + importadorDto.getExtensaoArquivo();
 		byte[] conteudoArquivo = UtilBase64.decodificarBase64(importadorDto.getDadosArquivoBase64());
-		PageResponse<List<Lancamento>> filtroLancamentos = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
-		List<Lancamento> lancamentosDoMes = filtroLancamentos.getResultado();
-		ImportadorArquivo importador = this.mapImportadores.get(chaveImportador);
+		ImportadorArquivo importador = mapImportadores.get(chaveImportador);
 		
 		if (! importador.isExtensaoValida(importadorDto.getExtensaoArquivo())) {
 			throw new NegocioException("Extensão inválida para esse banco.");
 		}
-		importador.importar(importadorDto.getNomeArquivo(), conteudoArquivo, lancamentosDoMes);
+		List<Lancamento> lancamentos = importador.importar(importadorDto.getNomeArquivo(), conteudoArquivo);
+		
+		Date dataBase = UtilData.createDataSemHoras(1, importadorDto.getMes(), importadorDto.getAno());
+		Date dataInicialDoMes = UtilData.getPrimeiroDiaMes(dataBase);
+		
+		if (lancamentos.get(1).getDataVencimento().before(dataInicialDoMes)) {
+			Date dataVencimento = lancamentos.get(1).getDataVencimento();
+			throw new NegocioException("Arquivo inválido para este mês. Os vencimentos do arquivo são de " + UtilData.getMes(dataVencimento) + "/" + UtilData.getAno(dataVencimento));
+		}
+		
+		
+		Banco banco = lancamentos.get(0).getBanco();
+		
+		PageResponse<List<Lancamento>> response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+		
+		//listar os lancamentos que tem dependencias e manter na listagem somente os que nao tem
+		List<Lancamento> lancamentosComDependencia = response.getResultado().stream()
+				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+				.map(lanc -> lanc.getLancamentoOrigem())
+				.distinct()
+				.collect(Collectors.toList());
+		
+		excluirLancamentosPorFormaPagamento( response.getResultado(), 
+				banco.getFormaPagamentoParaConciliacao(), true,
+				lancamentosComDependencia);
+		
+		response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
+				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+				.map(lanc -> lanc.getLancamentoOrigem())
+				.distinct()
+				.collect(Collectors.toList());
+
+		lancamentosComDependencia = lancamentosComDependencia
+					.stream()
+					.filter(lanc -> ! lancamentosComDependenciaPosExclusao.stream() 
+										.anyMatch(lancDepExc -> lancDepExc.getIdLancamento().equals(lanc.getIdLancamento()))
+							
+							)
+					.collect(Collectors.toList());
+					
+		
+		excluirLancamentosPorFormaPagamento( lancamentosComDependencia, 
+				banco.getFormaPagamentoParaConciliacao(), true,
+				new ArrayList<Lancamento>());
+		
+		//lancmaentos com origem. Armazenar essas origens em separado e excluir depois se eles náo tiverem mais nenhuma referencia
+		List<Lancamento> lancamentosOrigem = lancamentos.stream()
+				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+				.map(lanc -> lanc.getLancamentoOrigem())
+				.collect(Collectors.toList());
+		
+		lancamentos.forEach(lancamento -> {
+			try {
+				lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(lancamento.getDataHoraPagamento(), UtilData.PATTERN_DATA_ISO )); 
+				lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
+				
+				this.incluir(lancamento);
+			} catch (NegocioException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+
+
+	private void excluirLancamentosPorFormaPagamento(List<Lancamento> lancamentos, FormaPagamento formaPagamento, boolean somentePagos, List<Lancamento> lancamentosAExcluir) {
+		lancamentos.stream()
+		.filter(lanc -> lanc.isPago() == somentePagos )
+		.filter(lanc -> lanc.getFormaPagamento().equals(formaPagamento))
+		.forEach(lancamento -> {
+			try {
+				System.out.println("excluindo: " + lancamento.getIdLancamento());
+				lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(new Date(), UtilData.PATTERN_DATA_ISO )); 
+				lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
+				
+				if (! lancamentosAExcluir.stream().anyMatch(lanc -> lanc.getIdLancamento().equals(lancamento.getIdLancamento()))) {
+					this.excluir(lancamento.getIdLancamento());
+				}
+				
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IllegalArgumentException(e);
+			}
+		});
+		
+
 	}
 
 	
