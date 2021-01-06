@@ -89,6 +89,10 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 			String linha2 = dado.replaceAll("\"", "");
 			String dadosDaLinha[] = linha2.split(",");
 			
+			if (dadosDaLinha[2].toLowerCase().indexOf("resgate") > -1 || dadosDaLinha[2].indexOf("S A L D O") > -1) {
+				continue;
+			}
+			
 			Date dataVencimento = UtilData.getDataPorPattern(dadosDaLinha[0].replace("\"", ""), DATA);
 			Double valor = Double.valueOf(dadosDaLinha[5]);
 			
@@ -99,10 +103,9 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 			lancamento.setBanco(banco);
 			lancamento.setDataHoraPagamento(dataVencimento);
 			lancamento.setDataVencimento(dataVencimento);
-			lancamento.setDescLancamento(dadosDaLinha[2]);
+			lancamento.setDescLancamento(deparaHistoricoBanco != null ? deparaHistoricoBanco.getNomeDestino() : dadosDaLinha[2] );
 			lancamento.setFormaPagamento(banco.getFormaPagamentoParaConciliacao());
-			lancamento.setLancamentoOrigem(null);
-			lancamento.setNumDocumento( deparaHistoricoBanco != null ? deparaHistoricoBanco.getNomeDestino() : dadosDaLinha[2] );
+			lancamento.setNumDocumento( dadosDaLinha[4] );
 			lancamento.setTipoLancamento(new TipoLancamento());
 			
 			if (deparaHistoricoBanco != null) {
@@ -114,10 +117,14 @@ public class ImportadorCSVBB implements ImportadorArquivo {
 			
 			lancamento.setValorLancamento(BigDecimal.valueOf(valor < 0 ? valor * -1 : valor ));
 
-			System.out.println("linha avaliada: " + numLinha);
 			++numLinha;
 			lancamentos.add(lancamento);
 		}
+		
+		if (lancamentos.get(0).getDataVencimento().before(lancamentos.get(1).getDataVencimento())) {
+			lancamentos.get(0).setDataVencimento(lancamentos.get(1).getDataVencimento());
+		}
+		
 		return lancamentos;
 	}
 //
