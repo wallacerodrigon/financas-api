@@ -12,6 +12,7 @@ import br.net.walltec.api.comum.FiltroConsulta;
 import br.net.walltec.api.comum.PageRequest;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.comum.Pageable;
+import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.enums.EnumOperadorFiltro;
 import br.net.walltec.api.excecoes.PersistenciaException;
@@ -41,6 +42,8 @@ public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento>
 		
         return this.pesquisar(listaFiltros, pageable); 
 	}
+
+	
 
 	
 }
