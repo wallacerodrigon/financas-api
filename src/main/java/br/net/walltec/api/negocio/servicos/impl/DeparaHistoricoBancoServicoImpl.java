@@ -43,7 +43,7 @@ public class DeparaHistoricoBancoServicoImpl extends AbstractCrudServicePadrao<D
 	public List<DeparaHistoricoBanco> listaPorBanco(Integer numBanco) throws NegocioException {
 		try {
 			FiltroConsulta filtro = new FiltroConsulta();
-			filtro.setNomeCampo("numBanco");
+			filtro.setNomeCampo("banco");
 			filtro.setOperador(EnumOperadorFiltro.EQ);
 			filtro.setValor(numBanco.toString());
 			return dao.pesquisar(Arrays.asList(filtro), new PageRequest(0, Integer.MAX_VALUE)).getResultado();
