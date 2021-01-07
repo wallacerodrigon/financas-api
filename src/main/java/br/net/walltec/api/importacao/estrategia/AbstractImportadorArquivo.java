@@ -21,6 +21,10 @@ public abstract class AbstractImportadorArquivo implements ImportadorArquivo {
 	
 	private BancoService bancoService;
 	
+	protected Integer NUM_TIPO_LANC_RECEITA = 736;
+	
+	protected Integer NUM_TIPO_LANC_DESPESA = 152;
+	
 	/**
 	 * @param string
 	 * @param listaDeparas

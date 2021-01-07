@@ -27,6 +27,7 @@ public class ImportadorCefTxt extends AbstractImportadorArquivo  {
 	private static final int INDICE_DOC = 2;
 	private static final int INDICE_HISTORICO = 3;
 	private static final int INDICE_VALOR = 4;
+	private static final int INDICE_DEB_CRED = 5;
 	private static final String DATA = "yyyyMMdd";
 
 	@Override
@@ -68,13 +69,14 @@ public class ImportadorCefTxt extends AbstractImportadorArquivo  {
 			lancamento.setNumDocumento( dadosLinhas[INDICE_DOC].replaceAll("\"", "").trim() );
 			lancamento.setTipoLancamento(new TipoLancamento());
 			
+			Double valor = Double.valueOf(dadosLinhas[INDICE_VALOR].replaceAll("\"", ""));
 			if (deparaHistoricoBanco != null) {
 				lancamento.setTipoLancamento(deparaHistoricoBanco.getTipoLancamento());
 			} else {
-				lancamento.getTipoLancamento().setIdTipoLancamento(152);
+				lancamento.getTipoLancamento().setIdTipoLancamento(dadosLinhas[INDICE_DEB_CRED].replaceAll("\"", "").equals("D") ? NUM_TIPO_LANC_DESPESA : NUM_TIPO_LANC_RECEITA);
 			}
 			
-			Double valor = Double.valueOf(dadosLinhas[INDICE_VALOR].replaceAll("\"", ""));
+			
 			lancamento.setValorLancamento(BigDecimal.valueOf(valor < 0 ? valor * -1 : valor ));				
 			
 			

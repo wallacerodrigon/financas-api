@@ -72,7 +72,7 @@ public class ImportadorCSVBB extends AbstractImportadorArquivo {
 			if (deparaHistoricoBanco != null) {
 				lancamento.setTipoLancamento(deparaHistoricoBanco.getTipoLancamento());
 			} else {
-				lancamento.getTipoLancamento().setIdTipoLancamento(152);
+				lancamento.getTipoLancamento().setIdTipoLancamento( valor < 0 ? NUM_TIPO_LANC_DESPESA : NUM_TIPO_LANC_RECEITA  );
 			}
 			
 			
