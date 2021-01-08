@@ -1,6 +1,5 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import br.net.walltec.api.comum.PageResponse;
+import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
@@ -298,6 +298,14 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		});
 		
 
+	}
+
+
+
+	@Override
+	public void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
