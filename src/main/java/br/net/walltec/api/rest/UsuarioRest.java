@@ -155,7 +155,7 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 					.comEstaMensagem("É necessário estar autenticado para atualizar o token").construir();
 		}
 
-		if (!this.isLocalHost() && this.getRequest().getHeader("refreshToken") != null) {
+		if (!this.isLocalHost() && cookieRefresh == null ) {
 			return new RetornoRestDTO<RefreshTokenRetornoDTO>().comEsteCodigo(Status.BAD_REQUEST)
 					.comEstaMensagem("Refresh token enviado em local inválido").construir();
 		}
