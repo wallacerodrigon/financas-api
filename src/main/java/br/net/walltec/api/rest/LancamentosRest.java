@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import br.net.walltec.api.comum.PageResponse;
+import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
@@ -173,7 +174,22 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 		//liquidado ou nao
 		//forma de pagamento
 	}
-	
+
+	@POST
+	@Path("/dividir-lancamento")
+	public RetornoRestDTO dividirLancamento(DivisaoLancamentoDTO dto) {
+		try {
+			this.servico.dividirLancamento(dto);
+			return new RetornoRestDTO().comEsteCodigo(Status.OK)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
 	
 }
 

@@ -329,6 +329,8 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+
 	public void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException {
 		if (dto == null) {
 			throw new IllegalArgumentException("Informe os dados para efetuar a divisão do lançamento");
@@ -356,6 +358,9 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		novoLancamento.setDataHoraPagamentoString(UtilData.getDataFormatadaEmIso(dataEvento));
 		novoLancamento.setDataVencimentoString(UtilData.getDataFormatadaEmIso(dataEvento));
+		
+		lancamento.setDataHoraPagamentoString(UtilData.getDataFormatadaEmIso(lancamento.getDataHoraPagamento()));
+		lancamento.setDataVencimentoString(UtilData.getDataFormatadaEmIso(lancamento.getDataVencimento()));
 		
 		try {
 			this.lancamentoDao.alterar(novoLancamento);
