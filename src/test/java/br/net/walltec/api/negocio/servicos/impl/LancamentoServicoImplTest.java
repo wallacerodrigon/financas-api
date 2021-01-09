@@ -4,17 +4,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.verification.VerificationMode;
 
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
+import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.RegistroNaoEncontradoException;
+import br.net.walltec.api.negocio.servicos.FormaPagamentoService;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.utilitarios.UtilData;
 
@@ -24,12 +26,17 @@ public class LancamentoServicoImplTest {
 
 	@Mock
 	private LancamentoDao daoMock;
+	
+	@Mock
+	private FormaPagamentoService formaPagtoServiceMock;
 
 	@Before
 	public void init() {
 		daoMock = Mockito.mock(LancamentoDao.class);
-
+		formaPagtoServiceMock = Mockito.mock(FormaPagamentoServiceImpl.class);
+		
 		servico.setLancamentoDao(daoMock);
+		servico.setFormaPagamentoService(formaPagtoServiceMock);
 	}
 
 	@Test
@@ -157,9 +164,17 @@ public class LancamentoServicoImplTest {
 		Lancamento lancamento = new Lancamento();
 		lancamento.setValorLancamento(new BigDecimal(20.0));
 		lancamento.setDataVencimento(UtilData.createDataSemHoras(1, 1, 2000));
+		lancamento.setDataVencimentoString(dto.getDataEventoIso());
+		lancamento.setDataHoraPagamentoString(dto.getDataEventoIso());
 
+
+		FormaPagamento fp = new FormaPagamento();
+		fp.setIdFormaPagamento(34);
+		
+		
 		Mockito.when(daoMock.find(Mockito.anyInt())).thenReturn(lancamento);
-
+		Mockito.when(formaPagtoServiceMock.findByOptional(34)).thenReturn(Optional.ofNullable(fp));
+		
 		servico.dividirLancamento(dto);
 	}
 
@@ -215,7 +230,11 @@ public class LancamentoServicoImplTest {
 		lancamento.setValorLancamento(new BigDecimal(20.0));
 		lancamento.setDataVencimento(UtilData.createDataSemHoras(1, 1, 2000));
 
+		FormaPagamento fp = new FormaPagamento();
+		fp.setIdFormaPagamento(34);
+		
 		Mockito.when(daoMock.find(Mockito.anyInt())).thenReturn(lancamento);
+		Mockito.when(formaPagtoServiceMock.findByOptional(34)).thenReturn(Optional.ofNullable(fp));
 
 		servico.dividirLancamento(dto);
 		assertTrue(true);
@@ -268,6 +287,32 @@ public class LancamentoServicoImplTest {
 			
 		} catch(NegocioException e) {
 			assertTrue(e.getMessage().contains("Evento com data diferente do mês do lançamento"));
+
+		}
+
+	}
+	
+	@Test
+	public void testaDivisaoLancamentoComFormaPagamentoInvalida() throws Exception {
+		try {
+			DivisaoLancamentoDTO dto = new DivisaoLancamentoDTO();
+			dto.setIdLancamentoOrigem(1);
+			dto.setDataEventoIso("2021-01-01");
+			dto.setDescricao("Xlllllllll4444444");
+			dto.setIdFormaPagamento(400);
+			dto.setValor(new BigDecimal(10.0));
+
+			Lancamento lancamento = new Lancamento();
+			lancamento.setValorLancamento(new BigDecimal(20.0));
+			lancamento.setDataVencimento(new Date());
+			
+			Mockito.when(daoMock.find(Mockito.anyInt())).thenReturn(lancamento);
+
+			Mockito.when(formaPagtoServiceMock.findByOptional(400)).thenReturn(Optional.ofNullable(null));
+
+			servico.dividirLancamento(dto);
+		} catch(IllegalArgumentException e) {
+			assertTrue(e.getMessage().contains("Forma de pagamento inexistente"));
 
 		}
 

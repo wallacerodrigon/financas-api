@@ -1,5 +1,6 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
 
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
@@ -22,12 +22,14 @@ import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.excecoes.PersistenciaException;
 import br.net.walltec.api.excecoes.RegistroNaoEncontradoException;
 import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
 import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCefTxt;
 import br.net.walltec.api.negocio.servicos.AbstractCrudServicePadrao;
 import br.net.walltec.api.negocio.servicos.FechamentoContabilService;
+import br.net.walltec.api.negocio.servicos.FormaPagamentoService;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
@@ -36,7 +38,6 @@ import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
 import br.net.walltec.api.validadores.ValidadorDados;
-import lombok.Value;
 
 @Named
 public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
@@ -47,6 +48,9 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 	@Inject
 	private FechamentoContabilService fechamentoContabilService;
+	
+	@Inject
+	private FormaPagamentoService formaPagamentoService;
 
 	
 	private static Map<String, ImportadorArquivo> mapImportadores = new HashMap<String, ImportadorArquivo>();
@@ -304,17 +308,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 	}
 
-
-
-	@Override
-	public void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException {
-		if (dto == null) {
-			throw new IllegalArgumentException("Informe os dados para efetuar a divisão do lançamento");
-		}
-		ValidadorDados.validarDadosEntrada(dto);
-		
-		Lancamento lancamento = this.findByOptional(dto.getIdLancamentoOrigem()).orElseThrow(() -> new RegistroNaoEncontradoException("Lançamento não encontrado com esse id"));
-		
+	private void validarDivisaoLancamento(Lancamento lancamento, DivisaoLancamentoDTO dto) throws NegocioException {
 		if (lancamento.isPago()) {
 			throw new NegocioException("Lançamento pago, não poderá ser dividido");
 		}
@@ -329,11 +323,47 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 			throw new NegocioException("Evento com data diferente do mês do lançamento");
 		}
 		
-		//
-		//estando tudo ok, subtrair o valor do lancamento pelo valor da divisao e atualizar o lançamento
+		this.formaPagamentoService.findByOptional(dto.getIdFormaPagamento()).orElseThrow(() -> 
+			new IllegalArgumentException("Forma de pagamento inexistente"));
+	}
+
+
+	@Override
+	public void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException {
+		if (dto == null) {
+			throw new IllegalArgumentException("Informe os dados para efetuar a divisão do lançamento");
+		}
+		ValidadorDados.validarDadosEntrada(dto);
 		
-		//depis criar um novo lancamento e colocar sua origem com o lancamento de origem
+		Lancamento lancamento = this.findByOptional(dto.getIdLancamentoOrigem()).orElseThrow(() -> new RegistroNaoEncontradoException("Lançamento não encontrado com esse id"));
 		
+		this.validarDivisaoLancamento(lancamento, dto);
+
+		BigDecimal novoValor = lancamento.getValorLancamento().subtract(dto.getValor());
+		
+		lancamento.setValorLancamento(novoValor);
+		
+		Date dataEvento = UtilData.getDataPorPattern(dto.getDataEventoIso(), UtilData.PATTERN_DATA_ISO);
+
+		Lancamento novoLancamento = new Lancamento();
+		novoLancamento.setDataHoraPagamento(dataEvento);
+		novoLancamento.setDataVencimento(dataEvento);
+		novoLancamento.setDescLancamento(dto.getDescricao());
+		novoLancamento.setFormaPagamento(this.formaPagamentoService.findByOptional(dto.getIdFormaPagamento()).get());
+		novoLancamento.setLancamentoOrigem(lancamento);
+		novoLancamento.setTipoLancamento(lancamento.getTipoLancamento());
+		novoLancamento.setValorLancamento(dto.getValor());
+		
+		novoLancamento.setDataHoraPagamentoString(UtilData.getDataFormatadaEmIso(dataEvento));
+		novoLancamento.setDataVencimentoString(UtilData.getDataFormatadaEmIso(dataEvento));
+		
+		try {
+			this.lancamentoDao.alterar(novoLancamento);
+		} catch (PersistenciaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new NegocioException(e.getMessage());
+		}
 	}
 
 
@@ -343,6 +373,15 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	 */
 	public void setLancamentoDao(LancamentoDao lancamentoDao) {
 		this.lancamentoDao = lancamentoDao;
+	}
+
+
+
+	/**
+	 * @param formaPagamentoService the formaPagamentoService to set
+	 */
+	public void setFormaPagamentoService(FormaPagamentoService formaPagamentoService) {
+		this.formaPagamentoService = formaPagamentoService;
 	}
 
 	

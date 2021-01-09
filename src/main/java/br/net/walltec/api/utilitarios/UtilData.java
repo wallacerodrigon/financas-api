@@ -73,6 +73,16 @@ public class UtilData {
 			return null;
 		}
 	}
+	
+	public static String getDataFormatadaEmIso(Date data) {
+		if (data != null) {
+			DateTimeFormatter formatador =
+					DateTimeFormatter.ofPattern(PATTERN_DATA_ISO);
+			return getLocalDate(data).format(formatador); //08/04/2014
+		} else {
+			return null;
+		}
+	}
 
 	public static String getDataFormatada(Date data, String pattern) {
 		if (data != null) {
