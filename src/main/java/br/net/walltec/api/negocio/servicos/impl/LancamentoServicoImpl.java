@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
 
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
@@ -21,6 +22,7 @@ import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.excecoes.RegistroNaoEncontradoException;
 import br.net.walltec.api.importacao.estrategia.ImportadorArquivo;
 import br.net.walltec.api.importacao.estrategia.ImportadorCSVBB;
 import br.net.walltec.api.importacao.estrategia.ImportadorCefTxt;
@@ -33,6 +35,8 @@ import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
+import br.net.walltec.api.validadores.ValidadorDados;
+import lombok.Value;
 
 @Named
 public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
@@ -304,8 +308,41 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 	@Override
 	public void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException {
-		// TODO Auto-generated method stub
+		if (dto == null) {
+			throw new IllegalArgumentException("Informe os dados para efetuar a divisão do lançamento");
+		}
+		ValidadorDados.validarDadosEntrada(dto);
 		
+		Lancamento lancamento = this.findByOptional(dto.getIdLancamentoOrigem()).orElseThrow(() -> new RegistroNaoEncontradoException("Lançamento não encontrado com esse id"));
+		
+		if (lancamento.isPago()) {
+			throw new NegocioException("Lançamento pago, não poderá ser dividido");
+		}
+		
+		
+		if (dto.getValor().compareTo(lancamento.getValorLancamento()) == 1) {
+			throw new IllegalArgumentException("Valor do evento deve ser menor ou igual ao valor do lançamento");
+		}
+		
+		Date dataEvento = UtilData.getDataPorPattern(dto.getDataEventoIso(), UtilData.PATTERN_DATA_ISO);
+		if (UtilData.getMes(dataEvento) != UtilData.getMes(lancamento.getDataVencimento())) {
+			throw new NegocioException("Evento com data diferente do mês do lançamento");
+		}
+		
+		//
+		//estando tudo ok, subtrair o valor do lancamento pelo valor da divisao e atualizar o lançamento
+		
+		//depis criar um novo lancamento e colocar sua origem com o lancamento de origem
+		
+	}
+
+
+
+	/**
+	 * @param lancamentoDao the lancamentoDao to set
+	 */
+	public void setLancamentoDao(LancamentoDao lancamentoDao) {
+		this.lancamentoDao = lancamentoDao;
 	}
 
 	
