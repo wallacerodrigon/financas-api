@@ -88,7 +88,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		.forEach(lancamento -> {
 			lancamento.setDataHoraPagamento(new Date()); 
 			try {
-				this.alterar(lancamento);
+				this.lancamentoDao.alterar(lancamento);
 				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
