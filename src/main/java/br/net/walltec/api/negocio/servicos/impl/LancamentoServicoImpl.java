@@ -188,21 +188,15 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
 	@Override
 	public void alterar(Lancamento objeto) throws NegocioException {
-		// TODO Auto-generated method stub
 		Lancamento l = this.find(objeto.getIdLancamento());
-		//l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
 		
 		
 		if (l.isPago()) {
 			throw new NegocioException("Lançamento pago, não pode ser alterado.");
 		}
 		
-//		if (objeto.getDataHoraPagamentoString() != null) {
-//			l.setDataHoraPagamento(
-//					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
-//		}
-		
 		try {
+			l.setDataVencimento(objeto.getDataVencimento());
 			l.setFormaPagamento(objeto.getFormaPagamento());
 			l.setDescLancamento(objeto.getDescLancamento());
 			l.setValorLancamento(objeto.getValorLancamento());

@@ -16,17 +16,23 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.beanutils.BeanUtils;
+
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
+import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
 import br.net.walltec.api.rest.comum.RetornoRestDTO;
+import br.net.walltec.api.rest.dto.AlteracaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
+import br.net.walltec.api.rest.dto.InclusaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
+import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.validadores.ValidadorDados;
 import io.swagger.annotations.Api;
 
@@ -75,8 +81,6 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	public RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
 		try {
 			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
-			
-			//listaLancamentos.getResultado().stream().forEach(lanc -> lanc.setDataVencimentoString(UtilData.getDataFormatada(lanc.getDataVencimento())));
 			
 			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(listaLancamentos)
@@ -182,6 +186,60 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 			this.servico.dividirLancamento(dto);
 			return new RetornoRestDTO().comEsteCodigo(Status.OK)
 					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
+	
+	@Override
+	public RetornoRestDTO<Lancamento> salvar(Lancamento objeto) throws WebServiceException {
+		return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem("serviço não habilitado")
+				.construir();
+	}
+	
+	@Override
+	public RetornoRestDTO<Lancamento> alterar(Lancamento objeto) throws WebServiceException {
+		return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem("serviço não habilitado")
+				.construir();
+	}
+	
+	@POST
+	@Path("/incluir")
+	public RetornoRestDTO<Lancamento> incluir(InclusaoLancamentoDTO objeto) throws WebServiceException {
+		try {
+			ValidadorDados.validarDadosEntrada(objeto);
+
+			Lancamento lancamento = new Lancamento();
+			BeanUtils.copyProperties(lancamento, objeto);
+			lancamento.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
+			
+			this.getServico().incluir(lancamento);
+			return new RetornoRestDTO<Lancamento>().comEsteCodigo(Status.CREATED)
+					.comEstaMensagem(getServico().getIdObjeto(lancamento).toString()).construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
+	
+	@PUT
+	@Path("/alterar")	
+	public RetornoRestDTO<Lancamento> alterar(AlteracaoLancamentoDTO objeto) throws WebServiceException {
+		try {
+			ValidadorDados.validarDadosEntrada(objeto);
+			Lancamento lancamento = new Lancamento();
+			BeanUtils.copyProperties(lancamento, objeto);
+			lancamento.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
+
+			this.getServico().alterar(lancamento);
+			return new RetornoRestDTO<Lancamento>().comEsteCodigo(Status.OK).comEsteRetorno(objeto).construir();
 		} catch (NegocioException e) {
 			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
 					.construir();
