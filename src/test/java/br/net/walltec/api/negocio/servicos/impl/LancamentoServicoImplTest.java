@@ -164,8 +164,6 @@ public class LancamentoServicoImplTest {
 		Lancamento lancamento = new Lancamento();
 		lancamento.setValorLancamento(new BigDecimal(20.0));
 		lancamento.setDataVencimento(UtilData.createDataSemHoras(1, 1, 2000));
-		lancamento.setDataVencimentoString(dto.getDataEventoIso());
-		lancamento.setDataHoraPagamentoString(dto.getDataEventoIso());
 
 
 		FormaPagamento fp = new FormaPagamento();

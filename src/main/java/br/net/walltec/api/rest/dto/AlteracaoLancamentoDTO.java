@@ -4,8 +4,14 @@
 package br.net.walltec.api.rest.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
+import javax.persistence.JoinColumn;
 import javax.validation.constraints.NotNull;
+
+import br.net.walltec.api.entidades.FormaPagamento;
+import br.net.walltec.api.entidades.TipoLancamento;
+import lombok.Data;
 
 
 
@@ -13,6 +19,7 @@ import javax.validation.constraints.NotNull;
  * @author wallace
  *
  */
+@Data
 public class AlteracaoLancamentoDTO implements Serializable {
 
 	/**
@@ -20,67 +27,22 @@ public class AlteracaoLancamentoDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	@NotNull(message="Id do lançamento é obrigatório")
+	@NotNull(message="ID lançamento é obrigatório")
 	private Integer idLancamento;
-
-	@NotNull(message="Data de vencimento é obrigatória")
-	private String dataVencimento;
 	
-	@NotNull(message="Valor é obrigatório")
-	private Double valor;
+	@NotNull(message="Tipo lançamento é obrigatório")
+	private TipoLancamento tipoLancamento;
+	 
+	@NotNull(message="Valor do lançamento é obrigatório")
+	private BigDecimal valorLancamento;
 
-	private String numDocumento;
+	@JoinColumn(name="idformapagamento", nullable=false)	
+	private FormaPagamento formaPagamento;
 
-	@NotNull(message="Id da forma de pagamento é obrigatória")
-	private Integer idFormaPagamento;
+	@NotNull(message="Descrição do lançamento é obrigatório")
+	private String descLancamento;
 
-	@NotNull(message="Descrição é obrigatório")
-	private String descricao;
-	
-	private boolean bolPago;
-	
-	public Integer getIdLancamento() {
-		return idLancamento;
-	}
-	public void setIdLancamento(Integer idLancamento) {
-		this.idLancamento = idLancamento;
-	}
-	public String getDataVencimento() {
-		return dataVencimento;
-	}
-	public void setDataVencimento(String dataVencimento) {
-		this.dataVencimento = dataVencimento;
-	}
-	public Double getValor() {
-		return valor;
-	}
-	public void setValor(Double valor) {
-		this.valor = valor;
-	}
-	public String getNumDocumento() {
-		return numDocumento;
-	}
-	public void setNumDocumento(String numDocumento) {
-		this.numDocumento = numDocumento;
-	}
-	public Integer getIdFormaPagamento() {
-		return idFormaPagamento;
-	}
-	public void setIdFormaPagamento(Integer idFormaPagamento) {
-		this.idFormaPagamento = idFormaPagamento;
-	}
-	public String getDescricao() {
-		return descricao;
-	}
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-	public boolean isBolPago() {
-		return bolPago;
-	}
-	public void setBolPago(boolean bolPago) {
-		this.bolPago = bolPago;
-	}
-	
+	@NotNull(message="Data de vencimento é obrigatório")
+	private String dataVencimentoString;
 	
 }

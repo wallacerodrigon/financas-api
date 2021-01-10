@@ -85,8 +85,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		this.getLancamentosPorIds(idsLancamentos)
 		.stream()
 		.forEach(lancamento -> {
-			lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(new Date(), UtilData.PATTERN_DATA_ISO )); 
-			lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
+			lancamento.setDataHoraPagamento(new Date()); 
 			try {
 				this.alterar(lancamento);
 				
@@ -160,21 +159,20 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	public void alterar(Lancamento objeto) throws NegocioException {
 		// TODO Auto-generated method stub
 		Lancamento l = this.find(objeto.getIdLancamento());
-		l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
+		//l.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
 		
 		
 		if (l.isPago()) {
 			throw new NegocioException("Lançamento pago, não pode ser alterado.");
 		}
 		
-		if (objeto.getDataHoraPagamentoString() != null) {
-			l.setDataHoraPagamento(
-					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
-		}
+//		if (objeto.getDataHoraPagamentoString() != null) {
+//			l.setDataHoraPagamento(
+//					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
+//		}
 		
 		try {
 			l.setFormaPagamento(objeto.getFormaPagamento());
-			l.setDataVencimentoString(objeto.getDataVencimentoString());
 			l.setDescLancamento(objeto.getDescLancamento());
 			l.setValorLancamento(objeto.getValorLancamento());
 			this.lancamentoDao.alterar(l);
@@ -186,12 +184,6 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED)
 	@Override
 	public void incluir(Lancamento objeto) throws NegocioException {
-		// TODO Auto-generated method stub
-		objeto.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
-		if (objeto.getDataHoraPagamentoString() != null) {
-			objeto.setDataHoraPagamento(
-					UtilData.getDataPorPattern(objeto.getDataHoraPagamentoString(), UtilData.PATTERN_DATA_ISO));
-		}
 		try {
 			this.lancamentoDao.incluir(objeto);
 		} catch (Exception e) {
@@ -271,9 +263,6 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		lancamentos.forEach(lancamento -> {
 			try {
-				lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(lancamento.getDataHoraPagamento(), UtilData.PATTERN_DATA_ISO )); 
-				lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
-				
 				this.incluir(lancamento);
 			} catch (NegocioException e) {
 				e.printStackTrace();
@@ -290,9 +279,6 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		.forEach(lancamento -> {
 			try {
 				System.out.println("excluindo: " + lancamento.getIdLancamento());
-				lancamento.setDataHoraPagamentoString(UtilData.getDataFormatada(new Date(), UtilData.PATTERN_DATA_ISO )); 
-				lancamento.setDataVencimentoString(UtilData.getDataFormatada(lancamento.getDataVencimento(), UtilData.PATTERN_DATA_ISO));
-				
 				if (! lancamentosAExcluir.stream().anyMatch(lanc -> lanc.getIdLancamento().equals(lancamento.getIdLancamento()))) {
 					this.excluir(lancamento.getIdLancamento());
 				}
@@ -355,12 +341,6 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		novoLancamento.setLancamentoOrigem(lancamento);
 		novoLancamento.setTipoLancamento(lancamento.getTipoLancamento());
 		novoLancamento.setValorLancamento(dto.getValor());
-		
-		novoLancamento.setDataHoraPagamentoString(UtilData.getDataFormatadaEmIso(dataEvento));
-		novoLancamento.setDataVencimentoString(UtilData.getDataFormatadaEmIso(dataEvento));
-		
-		lancamento.setDataHoraPagamentoString(UtilData.getDataFormatadaEmIso(lancamento.getDataHoraPagamento()));
-		lancamento.setDataVencimentoString(UtilData.getDataFormatadaEmIso(lancamento.getDataVencimento()));
 		
 		try {
 			this.lancamentoDao.alterar(novoLancamento);

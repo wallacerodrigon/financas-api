@@ -14,8 +14,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -43,19 +41,15 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="idtipolancamento", nullable=false)	
-	@NotNull(message="Tipo lançamento é obrigatório")
 	private TipoLancamento tipoLancamento;
 	 
 	@Temporal(TemporalType.DATE)
 	@Column(nullable=false)
-	@NotNull(message="Data de vencimento é obrigatório")
 	private Date dataVencimento;
 	 
 	@Column(precision=2, nullable=false)
-	@NotNull(message="Valor do lançamento é obrigatório")
 	private BigDecimal valorLancamento;
 
-	@NotNull(message="Forma de pagamento é obrigatório")
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="idformapagamento", nullable=false)	
 	private FormaPagamento formaPagamento;
@@ -64,7 +58,6 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@JoinColumn(name="idlancamentoorigem")	
 	private Lancamento lancamentoOrigem;
 	
-	@NotNull(message="Descrição do lançamento é obrigatório")
 	@Column(nullable=false)
 	private String descLancamento;
 
@@ -80,13 +73,6 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataHoraConciliacao;
 	
-	@Transient
-	@NotNull(message="Data de vencimento é obrigatório")
-	private String dataVencimentoString;
-	
-	@Transient
-	private String dataHoraPagamentoString;
-
 	public boolean isPago() {
 		return this.dataHoraPagamento != null;
 	}
