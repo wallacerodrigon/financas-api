@@ -34,6 +34,7 @@ import br.net.walltec.api.negocio.servicos.LancamentoService;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
+import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
@@ -138,7 +139,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
-	public PageResponse<List<Lancamento>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException {
+	public PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException {
 		
 		if (UtilObjeto.isVazio(mes) || UtilObjeto.isVazio(ano) ) {
 			throw new CampoObrigatorioException("Mës ou ano não informados");
@@ -148,7 +149,37 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		Date dataFinal = UtilData.getUltimaDataMes(dataInicial);
 		
 		try {
-			return lancamentoDao.listarParcelas(dataInicial, dataFinal);
+			PageResponse<List<Lancamento>> parcelas = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+
+			Map<Lancamento, List<Lancamento>> mapLancamentosPorOrigem = 
+						parcelas.getResultado()
+						.stream()
+						.filter(lanc -> lanc.getLancamentoOrigem() != null)
+						.collect(Collectors.groupingBy(Lancamento::getLancamentoOrigem));
+			
+			List<Integer> idsLancamentosOriginarios = mapLancamentosPorOrigem
+						.keySet()
+						.stream()
+						.map(lanc -> lanc.getIdLancamento())
+						.collect(Collectors.toList());
+			
+			List<LancamentosConsultaDTO> listaDtos = parcelas.getResultado()
+					.stream()
+					.filter(lanc -> lanc.getLancamentoOrigem() == null)
+					.filter(lanc -> !idsLancamentosOriginarios.contains(lanc.getIdLancamento())  )
+					.map(lancamento -> {
+						return new LancamentosConsultaDTO(lancamento, null);
+					})
+					.collect(Collectors.toList());
+			
+			mapLancamentosPorOrigem.keySet()
+			.stream()
+			.map(lancamentoKey ->  new LancamentosConsultaDTO(lancamentoKey, mapLancamentosPorOrigem.get(lancamentoKey) ))
+			.forEach(dto -> listaDtos.add(dto));
+			
+			
+			return new PageResponse<List<LancamentosConsultaDTO>>(parcelas.getPagina(), parcelas.getQtdPaginas(), 
+					listaDtos.size(), parcelas.getPagina(), null, listaDtos);
 		} catch (Exception e) {
 			throw new NegocioException(e);
 		}
@@ -222,39 +253,40 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		Banco banco = lancamentos.get(0).getBanco();
 		
-		PageResponse<List<Lancamento>> response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+		PageResponse<List<LancamentosConsultaDTO>> response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
 		
 		//listar os lancamentos que tem dependencias e manter na listagem somente os que nao tem
-		List<Lancamento> lancamentosComDependencia = response.getResultado().stream()
-				.filter(lanc -> lanc.getLancamentoOrigem() != null)
-				.map(lanc -> lanc.getLancamentoOrigem())
-				.distinct()
-				.collect(Collectors.toList());
-		
-		excluirLancamentosPorFormaPagamento( response.getResultado(), 
-				banco.getFormaPagamentoParaConciliacao(), true,
-				lancamentosComDependencia);
-		
-		response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
-		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
-				.filter(lanc -> lanc.getLancamentoOrigem() != null)
-				.map(lanc -> lanc.getLancamentoOrigem())
-				.distinct()
-				.collect(Collectors.toList());
+		//TODO: corrigir
+//		List<LancamentosConsultaDTO> lancamentosComDependencia = response.getResultado().stream()
+//				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+//				.map(lanc -> lanc.getLancamentoOrigem())
+//				.distinct()
+//				.collect(Collectors.toList());
+//		
+//		excluirLancamentosPorFormaPagamento( response.getResultado(), 
+//				banco.getFormaPagamentoParaConciliacao(), true,
+//				lancamentosComDependencia);
+//		
+//		response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+//		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
+//				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+//				.map(lanc -> lanc.getLancamentoOrigem())
+//				.distinct()
+//				.collect(Collectors.toList());
 
-		lancamentosComDependencia = lancamentosComDependencia
-					.stream()
-					.filter(lanc -> ! lancamentosComDependenciaPosExclusao.stream() 
-										.anyMatch(lancDepExc -> lancDepExc.getIdLancamento().equals(lanc.getIdLancamento()))
-							
-							)
-					.collect(Collectors.toList());
-					
-		
-		excluirLancamentosPorFormaPagamento( lancamentosComDependencia, 
-				banco.getFormaPagamentoParaConciliacao(), true,
-				new ArrayList<Lancamento>());
-		
+//		lancamentosComDependencia = lancamentosComDependencia
+//					.stream()
+//					.filter(lanc -> ! lancamentosComDependenciaPosExclusao.stream() 
+//										.anyMatch(lancDepExc -> lancDepExc.getIdLancamento().equals(lanc.getIdLancamento()))
+//							
+//							)
+//					.collect(Collectors.toList());
+//					
+//		
+//		excluirLancamentosPorFormaPagamento( lancamentosComDependencia, 
+//				banco.getFormaPagamentoParaConciliacao(), true,
+//				new ArrayList<Lancamento>());
+//		
 		//lancmaentos com origem. Armazenar essas origens em separado e excluir depois se eles náo tiverem mais nenhuma referencia
 		List<Lancamento> lancamentosOrigem = lancamentos.stream()
 				.filter(lanc -> lanc.getLancamentoOrigem() != null)

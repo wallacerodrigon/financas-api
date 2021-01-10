@@ -12,6 +12,7 @@ import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
+import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 
 /**
  * @author Wallace
@@ -23,7 +24,7 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 
 	boolean excluirParcelas(List<Integer> idsLancamentos) throws NegocioException;
 	
-	PageResponse<List<Lancamento>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException;
+	PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException;
 	
 	void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException;
 

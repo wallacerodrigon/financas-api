@@ -25,6 +25,7 @@ import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.comum.RequisicaoRestPadrao;
 import br.net.walltec.api.rest.comum.RetornoRestDTO;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
+import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.validadores.ValidadorDados;
 import io.swagger.annotations.Api;
@@ -71,21 +72,20 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	
 	@GET
 	@Path("/filtrar/mes/{mes}/ano/{ano}")
-	public RetornoRestDTO<PageResponse<List<Lancamento>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
+	public RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
 		try {
-			PageResponse<List<Lancamento>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
+			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
 			
-			//TODO: resolver
 			//listaLancamentos.getResultado().stream().forEach(lanc -> lanc.setDataVencimentoString(UtilData.getDataFormatada(lanc.getDataVencimento())));
 			
-			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.OK)
+			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(listaLancamentos)
 					.construir();
 		} catch (NegocioException e) {
-			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
 					.construir();
 		} catch (Exception e) {
-			return new RetornoRestDTO<PageResponse<List<Lancamento>>>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
 					.construir();
 		}
 	}
