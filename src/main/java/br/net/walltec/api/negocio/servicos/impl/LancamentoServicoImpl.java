@@ -227,14 +227,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	    	throw new NegocioException("Mês fechado, não poderá ter importação.");
 	    }
 	    
-		String chaveImportador = importadorDto.getNumBanco() +"_" + importadorDto.getExtensaoArquivo();
-		byte[] conteudoArquivo = UtilBase64.decodificarBase64(importadorDto.getDadosArquivoBase64());
-		ImportadorArquivo importador = mapImportadores.get(chaveImportador);
-		
-		if (! importador.isExtensaoValida(importadorDto.getExtensaoArquivo())) {
-			throw new NegocioException("Extensão inválida para esse banco.");
-		}
-		List<Lancamento> lancamentos = importador.importar(importadorDto.getNomeArquivo(), conteudoArquivo);
+		List<Lancamento> lancamentos = importarConteudoArquivo(importadorDto);
 		
 		Date dataBase = UtilData.createDataSemHoras(1, importadorDto.getMes(), importadorDto.getAno());
 		Date dataInicialDoMes = UtilData.getPrimeiroDiaMes(dataBase);
@@ -244,48 +237,17 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 			throw new NegocioException("Arquivo inválido para este mês. Os vencimentos do arquivo são de " + UtilData.getMes(dataVencimento) + "/" + UtilData.getAno(dataVencimento));
 		}
 		
-		
 		Banco banco = lancamentos.get(0).getBanco();
 		
-		PageResponse<List<LancamentosConsultaDTO>> response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
+		Date dataInicial = UtilData.createDataSemHoras(1, importadorDto.getMes(), importadorDto.getAno());
+		Date dataFinal = UtilData.getUltimaDataMes(dataInicial);
 		
-		//listar os lancamentos que tem dependencias e manter na listagem somente os que nao tem
-		//TODO: corrigir
-//		List<LancamentosConsultaDTO> lancamentosComDependencia = response.getResultado().stream()
-//				.filter(lanc -> lanc.getLancamentoOrigem() != null)
-//				.map(lanc -> lanc.getLancamentoOrigem())
-//				.distinct()
-//				.collect(Collectors.toList());
-//		
-//		excluirLancamentosPorFormaPagamento( response.getResultado(), 
-//				banco.getFormaPagamentoParaConciliacao(), true,
-//				lancamentosComDependencia);
-//		
-//		response = this.filtrarLancamentos(importadorDto.getMes(), importadorDto.getAno());
-//		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
-//				.filter(lanc -> lanc.getLancamentoOrigem() != null)
-//				.map(lanc -> lanc.getLancamentoOrigem())
-//				.distinct()
-//				.collect(Collectors.toList());
+		excluirLancamentosSalvos(banco, dataInicial, dataFinal);
+		
+		//agrupar pela descriçao do lançamento e fazer um agrupamento de origem desta forma
+		
+		//por chave, criar um lançamento que seja com valor zerado e todos os itens do mapa teráo este como origem
 
-//		lancamentosComDependencia = lancamentosComDependencia
-//					.stream()
-//					.filter(lanc -> ! lancamentosComDependenciaPosExclusao.stream() 
-//										.anyMatch(lancDepExc -> lancDepExc.getIdLancamento().equals(lanc.getIdLancamento()))
-//							
-//							)
-//					.collect(Collectors.toList());
-//					
-//		
-//		excluirLancamentosPorFormaPagamento( lancamentosComDependencia, 
-//				banco.getFormaPagamentoParaConciliacao(), true,
-//				new ArrayList<Lancamento>());
-//		
-		//lancmaentos com origem. Armazenar essas origens em separado e excluir depois se eles náo tiverem mais nenhuma referencia
-		List<Lancamento> lancamentosOrigem = lancamentos.stream()
-				.filter(lanc -> lanc.getLancamentoOrigem() != null)
-				.map(lanc -> lanc.getLancamentoOrigem())
-				.collect(Collectors.toList());
 		
 		lancamentos.forEach(lancamento -> {
 			try {
@@ -294,6 +256,66 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 				e.printStackTrace();
 			}
 		});
+	}
+
+
+
+	/**
+	 * @param banco
+	 * @param dataInicial
+	 * @param dataFinal
+	 */
+	private void excluirLancamentosSalvos(Banco banco, Date dataInicial, Date dataFinal) {
+		PageResponse<List<Lancamento>> response = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+
+		List<Lancamento> lancamentosComDependencia = response.getResultado().stream()
+				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+				.map(lanc -> lanc.getLancamentoOrigem())
+				.distinct()
+				.collect(Collectors.toList());
+		
+		excluirLancamentosPorFormaPagamento( response.getResultado(), 
+				banco.getFormaPagamentoParaConciliacao(), true,
+				lancamentosComDependencia);
+		
+		response = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
+				.filter(lanc -> lanc.getLancamentoOrigem() != null)
+				.map(lanc -> lanc.getLancamentoOrigem())
+				.distinct()
+				.collect(Collectors.toList());
+
+		lancamentosComDependencia = lancamentosComDependencia
+					.stream()
+					.filter(lanc -> ! lancamentosComDependenciaPosExclusao.stream() 
+										.anyMatch(lancDepExc -> lancDepExc.getIdLancamento().equals(lanc.getIdLancamento()))
+							
+							)
+					.collect(Collectors.toList());
+					
+		
+		excluirLancamentosPorFormaPagamento( lancamentosComDependencia, 
+				banco.getFormaPagamentoParaConciliacao(), true,
+				new ArrayList<Lancamento>());
+	}
+
+
+
+	/**
+	 * @param importadorDto
+	 * @return
+	 * @throws NegocioException
+	 */
+	private List<Lancamento> importarConteudoArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException {
+		String chaveImportador = importadorDto.getNumBanco() +"_" + importadorDto.getExtensaoArquivo();
+		byte[] conteudoArquivo = UtilBase64.decodificarBase64(importadorDto.getDadosArquivoBase64());
+		ImportadorArquivo importador = mapImportadores.get(chaveImportador);
+		
+		if (! importador.isExtensaoValida(importadorDto.getExtensaoArquivo())) {
+			throw new NegocioException("Extensão inválida para esse banco.");
+		}
+		List<Lancamento> lancamentos = importador.importar(importadorDto.getNomeArquivo(), conteudoArquivo);
+		return lancamentos;
 	}
 
 

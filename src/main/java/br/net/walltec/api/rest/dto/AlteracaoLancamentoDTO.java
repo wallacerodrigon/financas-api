@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import javax.persistence.JoinColumn;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.TipoLancamento;
 import lombok.Data;
@@ -20,6 +22,8 @@ import lombok.Data;
  *
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class AlteracaoLancamentoDTO implements Serializable {
 
 	/**

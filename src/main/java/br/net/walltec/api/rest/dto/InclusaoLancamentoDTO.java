@@ -1,10 +1,11 @@
 package br.net.walltec.api.rest.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import javax.persistence.JoinColumn;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import br.net.walltec.api.dto.DtoPadrao;
 import br.net.walltec.api.entidades.FormaPagamento;
@@ -12,6 +13,7 @@ import br.net.walltec.api.entidades.TipoLancamento;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InclusaoLancamentoDTO extends DtoPadrao {
 
 	
