@@ -50,7 +50,7 @@ public class ImportadorCSVBB extends AbstractImportadorArquivo {
 			String linha2 = dado.replaceAll("\"", "");
 			String dadosDaLinha[] = linha2.split(",");
 			
-			if (dadosDaLinha[2].toLowerCase().indexOf("resgate") > -1 || dadosDaLinha[2].indexOf("S A L D O") > -1) {
+			if (dadosDaLinha[2].indexOf("S A L D O") > -1) {
 				continue;
 			}
 			
