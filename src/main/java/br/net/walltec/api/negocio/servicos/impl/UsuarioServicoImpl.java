@@ -74,7 +74,7 @@ public class UsuarioServicoImpl extends AbstractCrudServicePadrao<Usuario> imple
 		} catch (NoResultException e) {
 			throw new RegistroNaoEncontradoException(e);
 		} catch (Exception e) {
-			throw new NegocioException(e);
+			throw new NegocioException(e.getMessage());
 		}
 	}
 
