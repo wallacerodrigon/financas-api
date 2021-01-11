@@ -250,7 +250,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		//agrupar pela descriçao do lançamento e fazer um agrupamento de origem desta forma
 		Map<String, List<Lancamento>> mapLancamentosPorDescricao = lancamentos
 				.stream()
-				.collect(Collectors.groupingBy(Lancamento::getDescLancamento));
+				.collect(Collectors.groupingBy(Lancamento::getChavePorDescFormaPagto));
 		
 		
 		mapLancamentosPorDescricao.keySet()
@@ -272,9 +272,14 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 						e.printStackTrace();
 					}
 					lancamentoOrigem.setNumDocumento(null);
-					lancamentoOrigem.setBanco(null);
 					lancamentoOrigem.setIdLancamento(null);
-					lancamentoOrigem.setValorLancamento( BigDecimal.ZERO );
+					BigDecimal totalDaChave = BigDecimal.ZERO;
+					for(Lancamento l : lancamentosAIncluir) {
+						 totalDaChave = totalDaChave.add( l.getValorLancamento() );
+					}
+					
+					lancamentoOrigem.setValorLancamento( totalDaChave );
+					
 					lancamentosAIncluir.stream().forEach(lanc -> lanc.setLancamentoOrigem(lancamentoOrigem));
 			 	}
 				incluirListaLancamentos(lancamentosAIncluir);
