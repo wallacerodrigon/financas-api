@@ -3,6 +3,7 @@ package br.net.walltec.api.negocio.servicos;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.Dependent;
@@ -102,6 +103,16 @@ public abstract class AbstractCrudServicePadrao<T> implements CrudPadraoService<
 	public T find(Serializable id) throws NegocioException {
         try {
             return getDao().find(id);
+        } catch (PersistenciaException e) {
+            throw new NegocioException(e);
+        }
+    }
+	
+	@Override
+	@Transactional(value=TxType.NOT_SUPPORTED)	
+	public Optional<T> findByOptional(Serializable id) throws NegocioException {
+        try {
+            return Optional.ofNullable(getDao().find(id));
         } catch (PersistenciaException e) {
             throw new NegocioException(e);
         }

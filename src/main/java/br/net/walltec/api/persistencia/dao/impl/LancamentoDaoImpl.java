@@ -23,7 +23,7 @@ import br.net.walltec.api.utilitarios.UtilData;
 @Named
 public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento> implements LancamentoDao {
 
-	public PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal) throws PersistenciaException {
+	public PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal) {
 		
 		List<FiltroConsulta> listaFiltros = new ArrayList<FiltroConsulta>();
 		
@@ -40,7 +40,11 @@ public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento>
 		
 		Pageable pageable = new PageRequest(0, 99999);
 		
-        return this.pesquisar(listaFiltros, pageable); 
+        try {
+			return this.pesquisar(listaFiltros, pageable);
+		} catch (PersistenciaException e) {
+			throw new IllegalArgumentException(e);
+		} 
 	}
 
 	

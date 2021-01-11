@@ -3,6 +3,7 @@ package br.net.walltec.api.negocio.servicos.comum;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 import br.net.walltec.api.comum.FiltroConsulta;
 import br.net.walltec.api.comum.PageResponse;
@@ -26,6 +27,9 @@ public interface CrudPadraoService<T> {
 	 void excluir(Serializable id) throws NegocioException;
 	 
 	 T find(Serializable id) throws NegocioException;
+	 
+	 Optional<T> findByOptional(Serializable id) throws NegocioException;
+
 
 	 PageResponse<List<T>> pesquisar(List<FiltroConsulta> filtros, Pageable pageable) throws NegocioException;
 	 
