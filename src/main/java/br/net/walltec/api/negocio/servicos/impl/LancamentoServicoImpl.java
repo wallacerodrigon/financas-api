@@ -1,5 +1,6 @@
 package br.net.walltec.api.negocio.servicos.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +14,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+
+import org.apache.commons.beanutils.BeanUtils;
 
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
@@ -245,12 +248,54 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		excluirLancamentosSalvos(banco, dataInicial, dataFinal);
 		
 		//agrupar pela descriçao do lançamento e fazer um agrupamento de origem desta forma
+		Map<String, List<Lancamento>> mapLancamentosPorDescricao = lancamentos
+				.stream()
+				.collect(Collectors.groupingBy(Lancamento::getDescLancamento));
 		
-		//por chave, criar um lançamento que seja com valor zerado e todos os itens do mapa teráo este como origem
+		
+		mapLancamentosPorDescricao.keySet()
+			.stream()
+			.forEach(chave -> {
+			 	List<Lancamento> lancamentosAIncluir = mapLancamentosPorDescricao.get(chave);
+			 	
+			 	if (lancamentosAIncluir.size() > 1) {
+			 		Lancamento lancamentoInicialDaChave = lancamentosAIncluir.get(0);
+					
+					Lancamento lancamentoOrigem = new Lancamento();
+					try {
+						BeanUtils.copyProperties(lancamentoOrigem, lancamentoInicialDaChave);
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					lancamentoOrigem.setNumDocumento(null);
+					lancamentoOrigem.setBanco(null);
+					lancamentoOrigem.setIdLancamento(null);
+					lancamentoOrigem.setValorLancamento( BigDecimal.ZERO );
+					lancamentosAIncluir.stream().forEach(lanc -> lanc.setLancamentoOrigem(lancamentoOrigem));
+			 	}
+				incluirListaLancamentos(lancamentosAIncluir);
+			});
+		
+		
+	}
 
-		
+
+
+	/**
+	 * @param lancamentos
+	 */
+	private void incluirListaLancamentos(List<Lancamento> lancamentos) {
 		lancamentos.forEach(lancamento -> {
 			try {
+				if (lancamento.getLancamentoOrigem() != null) {
+					this.incluir(lancamento.getLancamentoOrigem());
+				}
+				
+				
 				this.incluir(lancamento);
 			} catch (NegocioException e) {
 				e.printStackTrace();

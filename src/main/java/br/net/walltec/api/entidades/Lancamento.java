@@ -231,5 +231,32 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 		this.dataHoraConciliacao = dataHoraConciliacao;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((idLancamento == null) ? 0 : idLancamento.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Lancamento other = (Lancamento) obj;
+		if (idLancamento == null) {
+			if (other.idLancamento != null)
+				return false;
+		} else if (!idLancamento.equals(other.idLancamento))
+			return false;
+		return true;
+	}
+
+	
+	
 }
  
