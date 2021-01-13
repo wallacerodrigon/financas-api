@@ -3,12 +3,13 @@ package br.net.walltec.api.comum;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import javax.ws.rs.core.StreamingOutput;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -17,6 +18,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
@@ -114,18 +116,24 @@ public class IntegracaoGoogleDrive {
 
 	public static byte[] recuperarArquivo(String fileId) throws Exception {
 		
+		///TODO: falta baixar o arquivo
 		java.io.File tempFile = new java.io.File("/Volumes/DADOS/imagens/dudoida/Foto17011.png");//.createTempFile("img", ".tmp");
 		FileOutputStream fos = new FileOutputStream(tempFile);
-		File execute = getDriveService().files().get(fileId).execute();
+		HttpResponse response = getDriveService().files().get(fileId).executeMedia();
 		
+//		StreamingOutput streamingOutput = output -> {
+//            try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output)) {
+//                bufferedOutputStream.write(bytes);
+//                bufferedOutputStream.flush();
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        };
+
+		System.out.println( response );
 		
-		System.out.println( execute );
-		
-		byte[] bytes = new byte[(int)tempFile.length()];
-//		fos.write(bytes);
-//		fos.close();
-		
-		return bytes;
+		return null;
 	}
 
 	public static FileList listarTodosArquivos() throws Exception {

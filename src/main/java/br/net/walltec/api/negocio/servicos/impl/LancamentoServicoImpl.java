@@ -17,6 +17,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import br.net.walltec.api.comum.IntegracaoGoogleDrive;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.entidades.Banco;
@@ -38,6 +39,7 @@ import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
@@ -465,6 +467,39 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	 */
 	public void setFormaPagamentoService(FormaPagamentoService formaPagamentoService) {
 		this.formaPagamentoService = formaPagamentoService;
+	}
+
+
+
+	@Override
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+	public void efetuarUploadArquivo(UploadDocumentoDTO dto) throws NegocioException {
+		String idGerado = IntegracaoGoogleDrive.salvarArquivo(dto.getConteudoEmBase64(), dto.getNomeArquivo());
+		
+		Lancamento lancamento = this.find(dto.getIdLancamento());
+		lancamento.setNumDocumento(idGerado);
+		this.alterar(lancamento);
+	}
+
+
+
+	@Override
+	public String efetuarDownloadArquivo(Integer idLancamento) throws NegocioException {
+		
+		Lancamento lancamento = this.find(idLancamento);
+		if (lancamento.getNumDocumento() != null) {
+			try {
+				return UtilBase64.codificarBase64(IntegracaoGoogleDrive.recuperarArquivo(lancamento.getNumDocumento()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new NegocioException(e.getMessage());
+
+			}
+		}
+
+		throw new NegocioException("Documento não registrado neste lançamento.");
+		
 	}
 
 	
