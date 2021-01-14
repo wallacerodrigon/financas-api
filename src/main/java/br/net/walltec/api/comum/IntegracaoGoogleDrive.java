@@ -1,9 +1,11 @@
 package br.net.walltec.api.comum;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +87,7 @@ public class IntegracaoGoogleDrive {
 	public static String salvarArquivo(String contentBase64, String fileName) throws NegocioException {
 		File fileMetadata = new File();
 		fileMetadata.setName(fileName);
+		//fileMetadata.setWebContentLink("/arquivo-teste.html");
 		FileOutputStream fos = null;
 		
 		try {
@@ -116,24 +119,10 @@ public class IntegracaoGoogleDrive {
 
 	public static byte[] recuperarArquivo(String fileId) throws Exception {
 		
-		///TODO: falta baixar o arquivo
-		java.io.File tempFile = new java.io.File("/Volumes/DADOS/imagens/dudoida/Foto17011.png");//.createTempFile("img", ".tmp");
-		FileOutputStream fos = new FileOutputStream(tempFile);
-		HttpResponse response = getDriveService().files().get(fileId).executeMedia();
-		
-//		StreamingOutput streamingOutput = output -> {
-//            try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output)) {
-//                bufferedOutputStream.write(bytes);
-//                bufferedOutputStream.flush();
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        };
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		getDriveService().files().get(fileId).executeMediaAndDownloadTo(outputStream);
 
-		System.out.println( response );
-		
-		return null;
+		return outputStream.toByteArray();
 	}
 
 	public static FileList listarTodosArquivos() throws Exception {
@@ -158,7 +147,7 @@ public class IntegracaoGoogleDrive {
 //		FileList lista = IntegracaoGoogleDrive.listarTodosArquivos();
 //		System.out.println(lista);
 		
-		java.io.File arquivo = new java.io.File("/Volumes/DADOS/imagens/dudoida/Foto1701.png");
+		java.io.File arquivo = new java.io.File("/Volumes/DADOS/imagens/dudoida/Foto1701_1116.png");
 //		
 //		BufferedInputStream bis =new BufferedInputStream(new FileInputStream(arquivo));
 //		byte[] bytesArquivo = new byte[(int)arquivo.length()];
@@ -173,9 +162,9 @@ public class IntegracaoGoogleDrive {
 		
 //		System.out.println(bytes);
 //		
-		//fos.write(bytes);
+		fos.write(bytes);
 //		
-		//fos.close();
+		fos.close();
 		
 		System.out.println("baixado com sucesso");
 //		Object id = IntegracaoGoogleDrive.
