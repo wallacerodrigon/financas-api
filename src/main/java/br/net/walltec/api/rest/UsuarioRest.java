@@ -3,6 +3,8 @@
  */
 package br.net.walltec.api.rest;
 
+import java.util.Date;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -39,6 +41,7 @@ import br.net.walltec.api.rest.dto.RefreshTokenRetornoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.tokens.TokenManager;
 import br.net.walltec.api.utilitarios.Constantes;
+import br.net.walltec.api.utilitarios.UtilCriptografia;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -72,6 +75,28 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 	public CrudPadraoService<Usuario> getServico() {
 		return servico;
 	}
+	
+	@Override
+	public RetornoRestDTO<Usuario> salvar(Usuario objeto) throws WebServiceException {
+	
+		objeto.setDataInclusao(new Date());
+		objeto.setDataUltimoAcesso(new Date());
+		objeto.setQtdAcessos( 0); 
+		objeto.setDescSenha( UtilCriptografia.criptografa(objeto.getNumCpf())  );
+		
+		return super.salvar(objeto);
+		
+	}
+	
+	@Override
+	public RetornoRestDTO<Usuario> alterar(Usuario objeto) throws WebServiceException {
+	
+		objeto.setDataAlteracao(new Date());
+		objeto.setDataUltimoAcesso(new Date());
+		
+		return super.alterar(objeto);
+	}
+	
 
 	@ApiOperation("Efetua o login de um usuário")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorno bem sucedido"),
