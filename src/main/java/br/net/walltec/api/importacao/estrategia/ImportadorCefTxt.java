@@ -66,7 +66,7 @@ public class ImportadorCefTxt extends AbstractImportadorArquivo  {
 			lancamento.setDataVencimento(dataVencimento);
 			lancamento.setDescLancamento(deparaHistoricoBanco != null ? deparaHistoricoBanco.getNomeDestino() : descricao );
 			lancamento.setFormaPagamento(banco.getFormaPagamentoParaConciliacao());
-			lancamento.setNumDocumento( dadosLinhas[INDICE_DOC].replaceAll("\"", "").trim() );
+			//lancamento.setNumDocumento( dadosLinhas[INDICE_DOC].replaceAll("\"", "").trim() );
 			lancamento.setTipoLancamento(new TipoLancamento());
 			
 			Double valor = Double.valueOf(dadosLinhas[INDICE_VALOR].replaceAll("\"", ""));

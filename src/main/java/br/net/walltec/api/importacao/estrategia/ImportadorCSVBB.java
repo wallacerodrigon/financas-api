@@ -66,7 +66,7 @@ public class ImportadorCSVBB extends AbstractImportadorArquivo {
 			lancamento.setDataVencimento(dataVencimento);
 			lancamento.setDescLancamento(deparaHistoricoBanco != null ? deparaHistoricoBanco.getNomeDestino() : dadosDaLinha[2] );
 			lancamento.setFormaPagamento(banco.getFormaPagamentoParaConciliacao());
-			lancamento.setNumDocumento( dadosDaLinha[4] );
+			//lancamento.setNumDocumento( dadosDaLinha[4] );
 			lancamento.setTipoLancamento(new TipoLancamento());
 			
 			if (deparaHistoricoBanco != null) {
