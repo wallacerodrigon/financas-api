@@ -478,7 +478,14 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 		Lancamento lancamento = this.find(dto.getIdLancamento());
 		lancamento.setNumDocumento(idGerado);
-		this.alterar(lancamento);
+		try {
+			this.lancamentoDao.alterar(lancamento);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new NegocioException(e.getMessage());
+
+		}
 	}
 
 
