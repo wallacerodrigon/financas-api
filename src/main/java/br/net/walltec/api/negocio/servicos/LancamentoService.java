@@ -13,6 +13,7 @@ import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 
 /**
  * @author Wallace
@@ -29,4 +30,8 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 	void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException;
 
 	void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException;
+	
+	void efetuarUploadArquivo(UploadDocumentoDTO dto) throws NegocioException;
+	
+	String efetuarDownloadArquivo(Integer idLancamento) throws NegocioException;
 }

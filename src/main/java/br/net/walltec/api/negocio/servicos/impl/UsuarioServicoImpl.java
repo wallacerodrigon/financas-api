@@ -3,7 +3,7 @@
  */
 package br.net.walltec.api.negocio.servicos.impl;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -155,8 +155,8 @@ public class UsuarioServicoImpl extends AbstractCrudServicePadrao<Usuario> imple
 		
 		String novaSenha = this.montarSenhaSegura(dto.getNovaSenha());
 		usuario.setDescSenha(novaSenha);
-		usuario.setDataAlteracao(LocalDateTime.now());
-		usuario.setDataUltimoAcesso(LocalDateTime.now());
+		usuario.setDataAlteracao(new Date());
+		usuario.setDataUltimoAcesso(new Date());
 		this.alterar(usuario);
 		
 	}

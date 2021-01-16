@@ -24,6 +24,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import br.net.walltec.api.entidades.comum.EntidadeBasica;
 import br.net.walltec.api.utilitarios.Constantes;
 import lombok.Data;
@@ -39,6 +41,7 @@ import lombok.ToString;
 @Table(name="perfil", schema=Constantes.SCHEMA_FINANCAS)
 @Cacheable
 @Cache(usage=CacheConcurrencyStrategy.TRANSACTIONAL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Perfil extends EntidadeBasica<Perfil> {
 
 	@Id

@@ -31,6 +31,7 @@ import br.net.walltec.api.rest.dto.AlteracaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.InclusaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.validadores.ValidadorDados;
@@ -145,14 +146,35 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	
 	@POST
 	@Path("/upload-documento")
-	public void efetuarUploadDocumento() {
-		
+	public RetornoRestDTO efetuarUploadDocumento(UploadDocumentoDTO dto) {
+		try {
+			ValidadorDados.validarDadosEntrada(dto);
+			this.servico.efetuarUploadArquivo(dto);
+			return new RetornoRestDTO().comEsteCodigo(Status.OK)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 	
 	@GET
-	@Path("/download-documento")
-	public void efetuarDownloadDocumento() {
-		
+	@Path("/download-documento/{idLancamento}")
+	public RetornoRestDTO efetuarDownloadDocumento(@PathParam("idLancamento") Integer idLancamento) {
+		try {
+			String retorno = this.servico.efetuarDownloadArquivo(idLancamento);
+			return new RetornoRestDTO().comEsteCodigo(Status.OK).comEsteRetorno(retorno)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 	
 	@POST
