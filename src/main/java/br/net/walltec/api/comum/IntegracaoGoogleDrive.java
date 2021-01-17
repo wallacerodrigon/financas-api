@@ -84,7 +84,7 @@ public class IntegracaoGoogleDrive {
 				.build();
 	}
 
-	public static String salvarArquivo(String contentBase64, String fileName) throws NegocioException {
+	public static String salvarArquivo(String contentBase64, String fileName, String mimeType) throws NegocioException {
 		File fileMetadata = new File();
 		fileMetadata.setName(fileName);
 		//fileMetadata.setWebContentLink("/arquivo-teste.html");
@@ -96,7 +96,7 @@ public class IntegracaoGoogleDrive {
 			fos = new FileOutputStream(filePath);
 			fos.write(bytesArquivo);
 			
-			FileContent mediaContent = new FileContent("image/png", filePath);
+			FileContent mediaContent = new FileContent(mimeType, filePath);
 			File file = getDriveService().files().create(fileMetadata, mediaContent).setFields("id").execute();
 			
 			return file.getId();
@@ -141,37 +141,5 @@ public class IntegracaoGoogleDrive {
 
 	}
 
-	public static void main(String[] args) throws Exception {
-		String idFile = "1CMPog8YZQBpVaR2QZAblSC5biJoi-BqW";
-		
-//		FileList lista = IntegracaoGoogleDrive.listarTodosArquivos();
-//		System.out.println(lista);
-		
-		java.io.File arquivo = new java.io.File("/Volumes/DADOS/imagens/dudoida/Foto1701_1116.png");
-//		
-//		BufferedInputStream bis =new BufferedInputStream(new FileInputStream(arquivo));
-//		byte[] bytesArquivo = new byte[(int)arquivo.length()];
-//		bis.read(bytesArquivo);
-//		
-//		String conteudoEmBase64 = UtilBase64.codificarBase64(bytesArquivo);
-//		bis.close();
-//		
-		FileOutputStream fos = new FileOutputStream(arquivo);
-		
-		byte[] bytes = IntegracaoGoogleDrive.recuperarArquivo(idFile);
-		
-//		System.out.println(bytes);
-//		
-		fos.write(bytes);
-//		
-		fos.close();
-		
-		System.out.println("baixado com sucesso");
-//		Object id = IntegracaoGoogleDrive.
-//				salvarArquivo(conteudoEmBase64, "Foto10.png");
-//		if (id != null) {
-//			System.out.println("Arquivo salvo com sucesso. ID:" + id);
-//		}
-	}
 
 }

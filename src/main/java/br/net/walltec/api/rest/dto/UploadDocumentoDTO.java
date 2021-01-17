@@ -18,4 +18,8 @@ public class UploadDocumentoDTO extends DtoPadrao {
 	
 	@NotNull(message="Favor informar o ID do lançamento")
 	private Integer idLancamento;
+	
+	
+	@NotNull(message="Favor informar o mimetype do arquivo")
+	private String mimeType;
 }
