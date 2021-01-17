@@ -474,10 +474,10 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	@Override
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
 	public void efetuarUploadArquivo(UploadDocumentoDTO dto) throws NegocioException {
-		String idGerado = IntegracaoGoogleDrive.salvarArquivo(dto.getConteudoEmBase64(), dto.getNomeArquivo());
+		String idGerado = IntegracaoGoogleDrive.salvarArquivo(dto.getConteudoEmBase64(), dto.getNomeArquivo(), dto.getMimeType());
 		
 		Lancamento lancamento = this.find(dto.getIdLancamento());
-		lancamento.setNumDocumento(idGerado);
+		lancamento.setNumDocumento(dto.getMimeType() + "@" + idGerado);
 		try {
 			this.lancamentoDao.alterar(lancamento);
 		} catch (Exception e) {
@@ -496,7 +496,9 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		Lancamento lancamento = this.find(idLancamento);
 		if (lancamento.getNumDocumento() != null) {
 			try {
-				return UtilBase64.codificarBase64(IntegracaoGoogleDrive.recuperarArquivo(lancamento.getNumDocumento()));
+				String dadosDocumento[] = lancamento.getNumDocumento().split("@");
+				String mimetype = dadosDocumento[0];
+				return mimetype + "@" + UtilBase64.codificarBase64(IntegracaoGoogleDrive.recuperarArquivo( dadosDocumento[1] ));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
