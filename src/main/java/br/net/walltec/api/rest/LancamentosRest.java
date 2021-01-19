@@ -20,8 +20,8 @@ import org.apache.commons.beanutils.BeanUtils;
 
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
+import br.net.walltec.api.dto.GeracaoLancamentosDTO;
 import br.net.walltec.api.entidades.Lancamento;
-import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
@@ -180,8 +180,19 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	
 	@POST
 	@Path("/gerar-lote")
-	public void gerarLoteLancamentos() {
-		
+	public RetornoRestDTO gerarLoteLancamentos(GeracaoLancamentosDTO dto) {
+		try {
+			ValidadorDados.validarDadosEntrada(dto);
+			this.servico.gerarLoteLancamentos(dto);
+			return new RetornoRestDTO().comEsteCodigo(Status.OK)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 	
 	@GET

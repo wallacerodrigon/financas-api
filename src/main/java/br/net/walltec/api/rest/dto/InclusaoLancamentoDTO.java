@@ -29,7 +29,7 @@ public class InclusaoLancamentoDTO extends DtoPadrao {
 	@NotNull(message="Descrição do lançamento é obrigatório")
 	private String descLancamento;
 
-	@NotNull(message="Data de vencimento é obrigatório")
+	@NotNull(message="Data de vencimento é obrigatório (formato: yyyy-mm-dd)")
 	private String dataVencimentoString;
 	
 }

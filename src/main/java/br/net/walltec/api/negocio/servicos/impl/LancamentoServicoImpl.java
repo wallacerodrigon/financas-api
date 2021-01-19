@@ -2,6 +2,7 @@ package br.net.walltec.api.negocio.servicos.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,10 +22,12 @@ import org.apache.commons.beanutils.BeanUtils;
 import br.net.walltec.api.comum.IntegracaoGoogleDrive;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
+import br.net.walltec.api.dto.GeracaoLancamentosDTO;
 import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
@@ -41,6 +45,7 @@ import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
+import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
@@ -515,6 +520,33 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		}
 
 		throw new NegocioException("Documento não registrado neste lançamento.");
+		
+	}
+
+
+
+	@Override
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+	public void gerarLoteLancamentos(GeracaoLancamentosDTO dto) throws NegocioException {
+
+		Date dataBase = UtilData.getDataPorPattern(dto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO);
+
+		for(int i = 0; i < dto.getQtdRepeticoes(); i++) {
+			dataBase = UtilData.somarData(1, ChronoUnit.MONTHS);
+
+			Lancamento lancamento = new Lancamento();
+			lancamento.setDataVencimento( dataBase );
+			lancamento.setDescLancamento(dto.getDescLancamento());
+			lancamento.setTipoLancamento(dto.getTipoLancamento());
+			lancamento.setFormaPagamento(dto.getFormaPagamento());
+			lancamento.setUsuario(RequisicaoInterceptor.getUsuarioLogadoSoComId());
+			lancamento.setValorLancamento(dto.getValorLancamento());
+			
+			this.incluir(lancamento);
+			
+		}
+		
+		
 		
 	}
 

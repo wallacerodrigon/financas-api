@@ -8,6 +8,7 @@ import java.util.List;
 
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
+import br.net.walltec.api.dto.GeracaoLancamentosDTO;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
@@ -34,4 +35,6 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 	void efetuarUploadArquivo(UploadDocumentoDTO dto) throws NegocioException;
 	
 	String efetuarDownloadArquivo(Integer idLancamento) throws NegocioException;
+
+	void gerarLoteLancamentos(GeracaoLancamentosDTO dto) throws NegocioException;
 }
