@@ -35,5 +35,7 @@ public interface PersistenciaPadraoDao<T>  {
 	 PageResponse<List<T>> pesquisar(String namedQueryName, Pageable pageable, ParametrosBuilder parametrosBuilder) throws PersistenciaException;	
 	 
 	 List<T> listarComCache(Pageable pageable) throws PersistenciaException;
-	 
+
+	 PageResponse<List<T>> pesquisar(StringBuilder hql, Pageable pageable,
+				ParametrosBuilder parametrosBuilder) throws PersistenciaException;
 }

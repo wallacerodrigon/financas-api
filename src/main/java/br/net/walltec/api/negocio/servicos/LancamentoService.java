@@ -25,9 +25,9 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 
 	boolean excluirParcelas(List<Integer> idsLancamentos) throws NegocioException;
 	
-	PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException;
+	PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano, Integer idUsuario) throws NegocioException;
 	
-	void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException;
+	void importarArquivo(ImportadorArquivoDTO importadorDto, Integer idUsuario) throws NegocioException;
 
 	void dividirLancamento(DivisaoLancamentoDTO dto) throws NegocioException;
 	

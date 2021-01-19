@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
@@ -81,7 +82,7 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	@Path("/filtrar/mes/{mes}/ano/{ano}")
 	public RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
 		try {
-			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano);
+			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano, RequisicaoInterceptor.usuarioLogado.getIdUsuario());
 			
 			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(listaLancamentos)
@@ -132,7 +133,7 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	public RetornoRestDTO importarArquivo(ImportadorArquivoDTO importador) {
 		try {
 			ValidadorDados.validarDadosEntrada(importador);
-			this.servico.importarArquivo(importador);
+			this.servico.importarArquivo(importador, RequisicaoInterceptor.usuarioLogado.getIdUsuario());
 			return new RetornoRestDTO().comEsteCodigo(Status.OK)
 					.construir();
 		} catch (NegocioException e) {
@@ -238,7 +239,8 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 			Lancamento lancamento = new Lancamento();
 			BeanUtils.copyProperties(lancamento, objeto);
 			lancamento.setDataVencimento(UtilData.getDataPorPattern(objeto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO));
-			
+			lancamento.setUsuario(RequisicaoInterceptor.getUsuarioLogadoSoComId());
+
 			this.getServico().incluir(lancamento);
 			return new RetornoRestDTO<Lancamento>().comEsteCodigo(Status.CREATED)
 					.comEstaMensagem(getServico().getIdObjeto(lancamento).toString()).construir();

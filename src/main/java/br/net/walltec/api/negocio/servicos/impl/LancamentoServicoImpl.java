@@ -24,6 +24,7 @@ import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.PersistenciaException;
@@ -144,7 +145,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
-	public PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano) throws NegocioException {
+	public PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano, Integer idUsuario) throws NegocioException {
 		
 		if (UtilObjeto.isVazio(mes) || UtilObjeto.isVazio(ano) ) {
 			throw new CampoObrigatorioException("Mës ou ano não informados");
@@ -154,7 +155,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		Date dataFinal = UtilData.getUltimaDataMes(dataInicial);
 		
 		try {
-			PageResponse<List<Lancamento>> parcelas = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+			PageResponse<List<Lancamento>> parcelas = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
 
 			Map<Lancamento, List<Lancamento>> mapLancamentosPorOrigem = 
 						parcelas.getResultado()
@@ -225,7 +226,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 	@Override
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
-	public void importarArquivo(ImportadorArquivoDTO importadorDto) throws NegocioException {
+	public void importarArquivo(ImportadorArquivoDTO importadorDto, Integer idUsuario) throws NegocioException {
 	    FechamentoContabil fechamentoContabil = fechamentoContabilService.obterPorMesAno(importadorDto.getAno(),  importadorDto.getMes());
 		
 	    if (fechamentoContabil != null) {
@@ -247,7 +248,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		Date dataInicial = UtilData.createDataSemHoras(1, importadorDto.getMes(), importadorDto.getAno());
 		Date dataFinal = UtilData.getUltimaDataMes(dataInicial);
 		
-		excluirLancamentosSalvos(banco, dataInicial, dataFinal);
+		excluirLancamentosSalvos(banco, dataInicial, dataFinal, idUsuario);
 		
 		//agrupar pela descriçao do lançamento e fazer um agrupamento de origem desta forma
 		Map<String, List<Lancamento>> mapLancamentosPorDescricao = lancamentos
@@ -275,6 +276,9 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 					}
 					lancamentoOrigem.setNumDocumento(null);
 					lancamentoOrigem.setIdLancamento(null);
+					lancamentoOrigem.setUsuario(new Usuario());
+					lancamentoOrigem.getUsuario().setIdUsuario(idUsuario);
+					
 					BigDecimal totalDaChave = BigDecimal.ZERO;
 					for(Lancamento l : lancamentosAIncluir) {
 						 totalDaChave = totalDaChave.add( l.getValorLancamento() );
@@ -282,7 +286,10 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 					
 					lancamentoOrigem.setValorLancamento( totalDaChave );
 					
-					lancamentosAIncluir.stream().forEach(lanc -> lanc.setLancamentoOrigem(lancamentoOrigem));
+					lancamentosAIncluir.stream().forEach(lanc -> {
+						lanc.setLancamentoOrigem(lancamentoOrigem);
+						lanc.setUsuario(lancamentoOrigem.getUsuario());
+					});
 			 	}
 				incluirListaLancamentos(lancamentosAIncluir);
 			});
@@ -317,8 +324,8 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	 * @param dataInicial
 	 * @param dataFinal
 	 */
-	private void excluirLancamentosSalvos(Banco banco, Date dataInicial, Date dataFinal) {
-		PageResponse<List<Lancamento>> response = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+	private void excluirLancamentosSalvos(Banco banco, Date dataInicial, Date dataFinal, Integer idUsuario) {
+		PageResponse<List<Lancamento>> response = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
 
 		List<Lancamento> lancamentosComDependencia = response.getResultado().stream()
 				.filter(lanc -> lanc.getLancamentoOrigem() != null)
@@ -330,7 +337,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 				banco.getFormaPagamentoParaConciliacao(), true,
 				lancamentosComDependencia);
 		
-		response = lancamentoDao.listarParcelas(dataInicial, dataFinal);
+		response = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
 		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
 				.filter(lanc -> lanc.getLancamentoOrigem() != null)
 				.map(lanc -> lanc.getLancamentoOrigem())
@@ -441,7 +448,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		novoLancamento.setLancamentoOrigem(lancamento);
 		novoLancamento.setTipoLancamento(lancamento.getTipoLancamento());
 		novoLancamento.setValorLancamento(dto.getValor());
-		
+		novoLancamento.setUsuario(lancamento.getUsuario());
 		try {
 			this.lancamentoDao.alterar(novoLancamento);
 		} catch (PersistenciaException e) {
