@@ -526,13 +526,12 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
-	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+	//@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRED )
 	public void gerarLoteLancamentos(GeracaoLancamentosDTO dto) throws NegocioException {
 
 		Date dataBase = UtilData.getDataPorPattern(dto.getDataVencimentoString(), UtilData.PATTERN_DATA_ISO);
 
 		for(int i = 0; i < dto.getQtdRepeticoes(); i++) {
-			dataBase = UtilData.somarData(1, ChronoUnit.MONTHS);
 
 			Lancamento lancamento = new Lancamento();
 			lancamento.setDataVencimento( dataBase );
@@ -543,7 +542,8 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 			lancamento.setValorLancamento(dto.getValorLancamento());
 			
 			this.incluir(lancamento);
-			
+			dataBase = UtilData.somarData(dataBase, 1, ChronoUnit.MONTHS);
+
 		}
 		
 		
