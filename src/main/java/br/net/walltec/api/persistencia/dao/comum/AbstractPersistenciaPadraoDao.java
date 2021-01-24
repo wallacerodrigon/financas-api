@@ -180,7 +180,25 @@ public abstract class AbstractPersistenciaPadraoDao<T> implements PersistenciaPa
 				.getResultList();
 	}
 
-	
+	public PageResponse<List<T>> pesquisar(StringBuilder hql, Pageable pageable,
+			ParametrosBuilder parametrosBuilder) throws PersistenciaException {
+		Query query = this.em.createQuery(hql.toString());
+		if (parametrosBuilder != null) {
+			parametrosBuilder.construirMapaParametros().forEach( (key,value)-> {
+				query.setParameter(key, value);
+			});
+			
+		}
+		List<T> resultado = query.getResultList();
+		int qtdPaginas = Double.valueOf(resultado.size() / pageable.getSizePerPage()).intValue();
+		
+		if (resultado.size() % pageable.getSizePerPage() != 0) {
+			qtdPaginas += 1;
+		}
+		
+		return new PageResponse<List<T>>(pageable.getPage(), pageable.getSizePerPage(), 
+				resultado.size(), qtdPaginas, null, resultado);
+	}
 	
 	
 	

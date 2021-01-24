@@ -16,6 +16,6 @@ import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
  */
 public interface LancamentoDao extends PersistenciaPadraoDao<Lancamento> {
 
-	PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal);
+	PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal, Integer idUsuario);
 
 }

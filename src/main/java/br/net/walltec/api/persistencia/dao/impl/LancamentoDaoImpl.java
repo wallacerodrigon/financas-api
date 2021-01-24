@@ -1,53 +1,44 @@
 package br.net.walltec.api.persistencia.dao.impl;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Named;
 
-import br.net.walltec.api.comum.FiltroConsulta;
 import br.net.walltec.api.comum.PageRequest;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.comum.Pageable;
-import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
-import br.net.walltec.api.enums.EnumOperadorFiltro;
 import br.net.walltec.api.excecoes.PersistenciaException;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.AbstractPersistenciaPadraoDao;
-import br.net.walltec.api.utilitarios.UtilData;
+import br.net.walltec.api.persistencia.dao.comum.ParametrosBuilder;
 
 @Named
 public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento> implements LancamentoDao {
 
-	public PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal) {
+	public PageResponse<List<Lancamento>> listarParcelas(Date dataInicial, Date dataFinal, Integer idUsuario) {
 		
-		List<FiltroConsulta> listaFiltros = new ArrayList<FiltroConsulta>();
+		StringBuilder builder = new StringBuilder("from Lancamento ");
 		
-		FiltroConsulta filtroInicial = new FiltroConsulta();
-		filtroInicial.setNomeCampo("dataVencimento");
-		filtroInicial.setOperador(EnumOperadorFiltro.DATA_INICIAL_MAIOR_QUE);
-		filtroInicial.setValor( UtilData.getDataFormatada(dataInicial, UtilData.PATTERN_DATA_ISO) );
-		
-		FiltroConsulta filtroFinal = new FiltroConsulta();
-		filtroFinal.setNomeCampo("dataVencimento");
-		filtroFinal.setOperador(EnumOperadorFiltro.DATA_FINAL_MENOR_QUE);
-		filtroFinal.setValor( UtilData.getDataFormatada(dataFinal,  UtilData.PATTERN_DATA_ISO) );
-		listaFiltros = Arrays.asList(filtroInicial, filtroFinal);
+		builder.append("where dataVencimento between :dataInicial and :dataFinal");
+		builder.append("  and usuario.idUsuario = :idUsuario ");
+		builder.append("order by dataVencimento");
 		
 		Pageable pageable = new PageRequest(0, 99999);
 		
+		ParametrosBuilder parametros = new ParametrosBuilder()
+				.addParametro("dataInicial", dataInicial)
+				.addParametro("dataFinal", dataFinal)
+				.addParametro("idUsuario", idUsuario);
+		
         try {
-			return this.pesquisar(listaFiltros, pageable);
+			return this.pesquisar(builder, pageable, parametros);
 		} catch (PersistenciaException e) {
 			throw new IllegalArgumentException(e);
 		} 
 	}
-
-	
 
 	
 }

@@ -73,6 +73,10 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataHoraConciliacao;
 	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="idUsuario")
+	private Usuario usuario;
+	
 	public boolean isPago() {
 		return this.dataHoraPagamento != null;
 	}

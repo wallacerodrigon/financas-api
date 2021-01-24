@@ -1,10 +1,8 @@
 package br.net.walltec.api.rest.interceptors;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -12,16 +10,13 @@ import javax.inject.Named;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response.Status;
 
 import br.net.walltec.api.dto.UsuarioLogadoDTO;
-import br.net.walltec.api.entidades.Endpoint;
 import br.net.walltec.api.entidades.Perfil;
+import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.AcessoNegadoException;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.PerfilService;
@@ -41,6 +36,8 @@ public class RequisicaoInterceptor {
 
 	@Inject
 	private PerfilService perfilService;
+	
+	public static UsuarioLogadoDTO usuarioLogado;
 
 	@SuppressWarnings("rawtypes")
 	@AroundInvoke
@@ -59,6 +56,7 @@ public class RequisicaoInterceptor {
 							contexto.getMethod().getAnnotation(RolesAllowed.class).value().toString().indexOf(Constantes.USUARIO_AUTENTICADO) > -1;
 					
 					String token = recuperarToken(headers);
+<<<<<<< HEAD
 									
 					//if (!deveEstarSoAutenticado) {
 						validarToken(token, contexto); // valida autenticação
@@ -68,6 +66,15 @@ public class RequisicaoInterceptor {
 
 				} 
 
+=======
+					validarToken(token, contexto); // valida autenticação
+					
+					RequisicaoInterceptor.usuarioLogado = new TokenManager().getUsuarioFromToken(token);
+					
+					//validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+					
+				}
+>>>>>>> release/v2.7.0
 				log.info("Finalizando interceptor");
 				return contexto.proceed();
 			} else {
@@ -92,9 +99,8 @@ public class RequisicaoInterceptor {
 	 */
 	private void validarAutorizacao(String token, RequisicaoRestPadrao target, Method metodoClasseRest) throws NegocioException {
 			TokenManager tokenManager = new TokenManager();
-			UsuarioLogadoDTO usuarioDto = tokenManager.getUsuarioFromToken(token);
 			
-			Perfil perfilDoUsuario = perfilService.find(usuarioDto.getPerfil().getIdPerfil());
+			Perfil perfilDoUsuario = perfilService.find(RequisicaoInterceptor.usuarioLogado.getPerfil().getIdPerfil());
 			
 			if (!perfilDoUsuario.isBolAdmin()) {
 				String recurso = target.getRequest().getRequestURI().split("rest")[1].split("\\/")[1];
@@ -155,6 +161,12 @@ public class RequisicaoInterceptor {
 
 	private boolean naoHaToken(String token) {
 		return token == null || token.isEmpty();
+	}
+	
+	public static final Usuario getUsuarioLogadoSoComId() {
+		Usuario usuario = new Usuario();
+		usuario.setIdUsuario(usuarioLogado.getIdUsuario());
+		return usuario;
 	}
 
 }
