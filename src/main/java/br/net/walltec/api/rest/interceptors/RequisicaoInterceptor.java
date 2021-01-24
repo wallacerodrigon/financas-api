@@ -56,17 +56,6 @@ public class RequisicaoInterceptor {
 							contexto.getMethod().getAnnotation(RolesAllowed.class).value().toString().indexOf(Constantes.USUARIO_AUTENTICADO) > -1;
 					
 					String token = recuperarToken(headers);
-<<<<<<< HEAD
-									
-					//if (!deveEstarSoAutenticado) {
-						validarToken(token, contexto); // valida autenticação
-//						validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
-					//}
-					
-
-				} 
-
-=======
 					validarToken(token, contexto); // valida autenticação
 					
 					RequisicaoInterceptor.usuarioLogado = new TokenManager().getUsuarioFromToken(token);
@@ -74,7 +63,6 @@ public class RequisicaoInterceptor {
 					//validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 					
 				}
->>>>>>> release/v2.7.0
 				log.info("Finalizando interceptor");
 				return contexto.proceed();
 			} else {

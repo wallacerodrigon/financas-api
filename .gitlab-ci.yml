@@ -13,7 +13,7 @@ deploy:
   script:
     - echo "testando..."
     - mvn clean install
-    - lftp -e "open ftp://184.107.54.145; set ssl:verify-certificate no;  user $FTP_USERNAME $FTP_PASSWORD; put -O appservers/wildfly-11.0.0.Final/standalone/deployments/ /builds/wallacerodrigon/financas-api/target/financas-api.war; bye"
+    - lftp -e "open ftp://walltec.dev.br; set ssl:verify-certificate no;  user $FTP_USERNAME $FTP_PASSWORD; put -O appservers/wildfly-11.0.0.Final/standalone/deployments/ /builds/wallacerodrigon/financas-api/target/financas-api.war; bye"
   allow_failure: false     
   only:
     - master
