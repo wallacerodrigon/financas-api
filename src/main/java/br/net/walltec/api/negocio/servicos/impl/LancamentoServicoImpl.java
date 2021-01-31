@@ -232,10 +232,13 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	@Override
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
 	public void importarArquivo(ImportadorArquivoDTO importadorDto, Integer idUsuario) throws NegocioException {
-	    FechamentoContabil fechamentoContabil = fechamentoContabilService.obterPorMesAno(importadorDto.getAno(),  importadorDto.getMes());
+		Usuario usuario = new Usuario();
+		usuario.setIdUsuario(idUsuario);
+		
+	    FechamentoContabil fechamentoContabil = fechamentoContabilService.obterPorMesAno(importadorDto.getAno(),  importadorDto.getMes(), usuario);
 		
 	    if (fechamentoContabil != null) {
-	    	throw new NegocioException("Mês fechado, não poderá ter importação.");
+	    	throw new NegocioException("Você está com este mês já encerrado, não poderá ter importação.");
 	    }
 	    
 		List<Lancamento> lancamentos = importarConteudoArquivo(importadorDto);

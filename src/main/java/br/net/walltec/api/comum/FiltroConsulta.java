@@ -29,7 +29,7 @@ public class FiltroConsulta {
 	
 	private EnumOperadorFiltro operador;
 	
-	private String valor;
+	private Object valor;
 
 	public List<FiltroConsulta> efetuarParse(String json, Class<?> classeDoFiltro) {
 		if (StringUtils.isBlank(json)) {

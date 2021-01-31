@@ -74,6 +74,7 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 			fechamento.setDataFechamento(LocalDateTime.now());
 			fechamento.setNumAno(dto.getNumAno());
 			fechamento.setNumMes(dto.getNumMes());
+			fechamento.setUsuario(RequisicaoInterceptor.getUsuarioLogadoSoComId());
 			return super.salvar(fechamento);
 	}
 	
@@ -84,7 +85,7 @@ public class FechamentoContabilRest extends RequisicaoRestPadrao<FechamentoConta
 			@PathParam("ano") Integer ano
 			) {
 		try {
-			FechamentoContabil fechamento = this.service.obterPorMesAno(ano, mes);
+			FechamentoContabil fechamento = this.service.obterPorMesAno(ano, mes, RequisicaoInterceptor.getUsuarioLogadoSoComId());
 			return new RetornoRestDTO<FechamentoContabil>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(fechamento)
 					.construir();

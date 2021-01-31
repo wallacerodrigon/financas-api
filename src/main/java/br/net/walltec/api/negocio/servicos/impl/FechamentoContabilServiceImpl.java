@@ -12,6 +12,7 @@ import br.net.walltec.api.comum.PageRequest;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.comum.Pageable;
 import br.net.walltec.api.entidades.FechamentoContabil;
+import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.enums.EnumOperadorFiltro;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.PersistenciaException;
@@ -36,7 +37,7 @@ public class FechamentoContabilServiceImpl extends AbstractCrudServicePadrao<Fec
 	}
 
 	@Override
-	public FechamentoContabil obterPorMesAno(Integer ano, Integer mes) throws NegocioException {
+	public FechamentoContabil obterPorMesAno(Integer ano, Integer mes, Usuario usuario) throws NegocioException {
 		List<FiltroConsulta> listaFiltros = new ArrayList<FiltroConsulta>();
 		
 		FiltroConsulta filtroInicial = new FiltroConsulta();
@@ -48,7 +49,13 @@ public class FechamentoContabilServiceImpl extends AbstractCrudServicePadrao<Fec
 		filtroFinal.setNomeCampo("numMes");
 		filtroFinal.setOperador(EnumOperadorFiltro.EQ);
 		filtroFinal.setValor( mes.toString() );
-		listaFiltros = Arrays.asList(filtroInicial, filtroFinal);
+		
+		FiltroConsulta filtroUsuario = new FiltroConsulta();
+		filtroUsuario.setNomeCampo("usuario");
+		filtroUsuario.setOperador(EnumOperadorFiltro.EQ);
+		filtroUsuario.setValor( usuario );
+		
+		listaFiltros = Arrays.asList(filtroInicial, filtroFinal, filtroUsuario);
 		
 		Pageable pageable = new PageRequest(0, 99999);
 		
