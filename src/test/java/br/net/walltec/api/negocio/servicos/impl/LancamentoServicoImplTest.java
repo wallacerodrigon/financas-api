@@ -295,7 +295,7 @@ public class LancamentoServicoImplTest {
 		try {
 			DivisaoLancamentoDTO dto = new DivisaoLancamentoDTO();
 			dto.setIdLancamentoOrigem(1);
-			dto.setDataEventoIso("2021-01-01");
+			dto.setDataEventoIso(UtilData.getDataFormatada(new Date(), UtilData.PATTERN_DATA_ISO)  );
 			dto.setDescricao("Xlllllllll4444444");
 			dto.setIdFormaPagamento(400);
 			dto.setValor(new BigDecimal(10.0));
