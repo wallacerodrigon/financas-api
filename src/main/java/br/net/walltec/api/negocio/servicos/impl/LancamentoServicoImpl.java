@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,7 +18,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.apache.commons.beanutils.BeanUtils;
 
-import br.net.walltec.api.comum.IntegracaoGoogleDrive;
+import br.net.walltec.api.comum.IntegracaoIntegrator;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
@@ -27,7 +26,6 @@ import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
-import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
@@ -489,14 +487,15 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	@Override
 	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
 	public void efetuarUploadArquivo(UploadDocumentoDTO dto) throws NegocioException {
-		String idGerado = IntegracaoGoogleDrive.salvarArquivo(dto.getConteudoEmBase64(), dto.getNomeArquivo(), dto.getMimeType());
+		String idGerado = IntegracaoIntegrator.salvarArquivo(dto.getConteudoEmBase64(), dto.getNomeArquivo(), dto.getMimeType());
 		
-		Lancamento lancamento = this.find(dto.getIdLancamento());
-		lancamento.setNumDocumento(dto.getMimeType() + "@" + idGerado);
 		try {
+			Lancamento lancamento = this.find(dto.getIdLancamento());
+			lancamento.setNumDocumento(dto.getMimeType() + "@" + idGerado);	
 			this.lancamentoDao.alterar(lancamento);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			IntegracaoIntegrator.apagarArquivo(idGerado);
 			e.printStackTrace();
 			throw new NegocioException(e.getMessage());
 
@@ -513,7 +512,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 			try {
 				String dadosDocumento[] = lancamento.getNumDocumento().split("@");
 				String mimetype = dadosDocumento[0];
-				return mimetype + "@" + UtilBase64.codificarBase64(IntegracaoGoogleDrive.recuperarArquivo( dadosDocumento[1] ));
+				return mimetype + "@" + UtilBase64.codificarBase64(IntegracaoIntegrator.recuperarArquivo( dadosDocumento[1] ));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

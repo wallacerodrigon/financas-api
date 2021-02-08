@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import br.net.walltec.api.comum.IntegracaoIntegrator;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
@@ -149,6 +150,7 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	@Path("/upload-documento")
 	public RetornoRestDTO efetuarUploadDocumento(UploadDocumentoDTO dto) {
 		try {
+			IntegracaoIntegrator.localHost = this.isLocalHost();
 			ValidadorDados.validarDadosEntrada(dto);
 			this.servico.efetuarUploadArquivo(dto);
 			return new RetornoRestDTO().comEsteCodigo(Status.OK)
@@ -166,6 +168,8 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	@Path("/download-documento/{idLancamento}")
 	public RetornoRestDTO efetuarDownloadDocumento(@PathParam("idLancamento") Integer idLancamento) {
 		try {
+			IntegracaoIntegrator.localHost = this.isLocalHost();
+
 			String retorno = this.servico.efetuarDownloadArquivo(idLancamento);
 			return new RetornoRestDTO().comEsteCodigo(Status.OK).comEsteRetorno(retorno)
 					.construir();
