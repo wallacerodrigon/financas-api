@@ -134,11 +134,10 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 //
 	@ApiOperation("Serviço para refreshToken")
 	@POST
-	@Path("/refresh-token/{idUsuario}")
+	@Path("/auth/refresh-token")
 	@PermitAll
-
 	//@RolesAllowed(value = { Constantes.USUARIO_AUTENTICADO } )	
-	public RetornoRestDTO<RefreshTokenRetornoDTO> refreshToken(@PathParam("idUsuario") Integer idUsuario,
+	public RetornoRestDTO<RefreshTokenRetornoDTO> refreshToken(Integer idUsuario,
 			@CookieParam("refreshToken") String cookieRefresh) throws WebServiceException {
 		try {
 			String accessToken = this.getRequest().getHeader(Constantes.TAG_TOKEN);
@@ -230,13 +229,13 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 	 * @return
 	 */
 	private Cookie gerarCookieRefreshToken(String refreshToken) {
-		String path = "/";
+		String path = getRequest().getContextPath()+"/auth/refresh-token";
 		String domain = getRequest().getServerName();
 		boolean ehHttps = this.isLocalHost() ? false : true;
 		Cookie c = new Cookie("refreshToken", refreshToken);
 		c.setDomain(domain);
 		c.setHttpOnly(true);
-		c.setMaxAge(2592000);
+		c.setMaxAge(refreshToken == null ? 0 : 2592000);
 		//c.setSecure(ehHttps);
 		c.setPath(path);
 		this.getResponse().addCookie(c);

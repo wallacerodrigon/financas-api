@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import br.net.walltec.api.comum.IntegracaoIntegrator;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
+import br.net.walltec.api.dto.ResumoLancamentosMesAnoDTO;
 import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
@@ -44,6 +46,7 @@ import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
+import br.net.walltec.api.utilitarios.Constantes;
 import br.net.walltec.api.utilitarios.UtilBase64;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
@@ -552,5 +555,72 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 		
 	}
 
+
+
+	@Override
+	public List<ResumoLancamentosMesAnoDTO> listarResumoLancamentosDoAno(Integer ano, Integer idUsuario)
+			throws NegocioException {
+
+		List<Lancamento> lancamentosFiltrados = this.lancamentoDao.listarLancamentosDoAno(ano, idUsuario);
+		
+		List<ResumoLancamentosMesAnoDTO> retorno = this.formatarResultado(ano, lancamentosFiltrados);
+		
+		retorno.sort(new Comparator<ResumoLancamentosMesAnoDTO>() {
+			@Override
+			public int compare(ResumoLancamentosMesAnoDTO o1, ResumoLancamentosMesAnoDTO o2) {
+				return o1.getNumMes().compareTo(o2.getNumMes());
+			}
+		});
+		return retorno;
+	}
+
+	private List<ResumoLancamentosMesAnoDTO> formatarResultado(Integer ano, List<Lancamento> lancamentos) {
+		if (lancamentos.isEmpty()) {
+			return null;
+		} else {
+			Map<Integer, List<ResumoLancamentosMesAnoDTO>> mapResumo = lancamentos
+						.stream()
+						.map(lancamento-> {
+							ResumoLancamentosMesAnoDTO dto = new ResumoLancamentosMesAnoDTO();
+							dto.setAno(ano);
+							dto.setNumMes( UtilData.getMes(lancamento.getDataVencimento()) );
+							dto.setTotalCreditos(lancamento.isDespesa() ? BigDecimal.ZERO :  lancamento.getValorLancamento());
+							dto.setTotalDebitos(lancamento.isDespesa() ? lancamento.getValorLancamento() : BigDecimal.ZERO);
+							return dto;
+						})
+						.collect(Collectors.groupingBy(ResumoLancamentosMesAnoDTO::getNumMes));
+			
+			return mapResumo.keySet().stream()
+				.map(chave -> {
+					ResumoLancamentosMesAnoDTO dto = new ResumoLancamentosMesAnoDTO();
+					dto.setAno(ano);
+					dto.setNumMes(chave);
+					dto.setNomeMes( Constantes.MESES_DO_ANO[chave -1] );
+
+					dto.setTotalCreditos(
+						BigDecimal.valueOf(
+							mapResumo.get(chave).stream()
+						.filter(item -> item.getTotalCreditos().compareTo(BigDecimal.ZERO) == 1 )
+						.map(item -> item.getTotalCreditos().doubleValue() )
+						.reduce(0.0, (elem1, elem2) -> elem1 + elem2))
+					);
+					
+					dto.setTotalDebitos(
+							BigDecimal.valueOf(
+								mapResumo.get(chave).stream()
+							.filter(item -> item.getTotalDebitos().compareTo(BigDecimal.ZERO) == 1 )
+							.map(item -> item.getTotalDebitos().doubleValue() )
+							.reduce(0.0, (elem1, elem2) -> elem1 + elem2))
+						);
+					
+					dto.setSaldoFinal(dto.getTotalCreditos().subtract(dto.getTotalDebitos()));
+					
+					
+					return dto;
+				})
+				.collect(Collectors.toList());
+						
+		}
+	}
 	
 }

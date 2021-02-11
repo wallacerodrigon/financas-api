@@ -22,6 +22,7 @@ import br.net.walltec.api.comum.IntegracaoIntegrator;
 import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
+import br.net.walltec.api.dto.ResumoLancamentosMesAnoDTO;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.WebServiceException;
@@ -201,20 +202,25 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	
 	@GET
 	@Path("/totalizador/resumo-anual/{ano}/ano")
-	public void listarResumoPorMesEAno() {
-		//retornar um dto com: ano, array de : mes - valor total
+	public RetornoRestDTO<List<ResumoLancamentosMesAnoDTO>> listarResumoPorMesEAno(@PathParam("ano") Integer ano) {
+		try {
+			List<ResumoLancamentosMesAnoDTO> dados = this.servico.listarResumoLancamentosDoAno(ano, RequisicaoInterceptor.usuarioLogado.getIdUsuario());
+			return new RetornoRestDTO().comEsteCodigo(Status.OK)
+					.comEsteRetorno(dados)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
 	}
 	
 	//estatisticas
 	@GET
 	@Path("/totalizador/por-mes-ano")
 	public void listarLancamentosPorMesAno() {
-		//retornar um objeto com todos os dados para gerar estatisticas a seguir.
-		
-		//TipoLancmaento
-		//TipoDespesa (c ou D)
-		//liquidado ou nao
-		//forma de pagamento
 	}
 
 	@POST

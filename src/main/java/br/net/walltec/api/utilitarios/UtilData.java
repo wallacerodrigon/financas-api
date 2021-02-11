@@ -221,6 +221,13 @@ public class UtilData {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return null;	}
+		return null;	
+	}
+	
+	public static String getNomeDoMes(Date data) {
+		return new SimpleDateFormat("MMMM").format(data);
+	}
+	
+   
 	
 }

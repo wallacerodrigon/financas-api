@@ -112,12 +112,12 @@ public class UsuarioServicoImpl extends AbstractCrudServicePadrao<Usuario> imple
 			throw new TokenExpiradoException("[FR-1] Sua sessão está expirada, logue novamente no sistema");
 		}
 		Claims claimsRefresh = new TokenManager().getClaims(refreshToken);
-		String hashAccessToken = (String)claimsRefresh.get(Constantes.TAG_HASH_TOKEN);
+		//String hashAccessToken = (String)claimsRefresh.get(Constantes.TAG_HASH_TOKEN);
 		String tokenDoHeader = accessToken.replaceAll("Bearer ", "").trim();
 		
-		if (! UtilCriptografia.criptografa(tokenDoHeader).equals(hashAccessToken) ) {
-			throw new NegocioException("Refresh token inválido.");
-		}
+//		if (! UtilCriptografia.criptografa(tokenDoHeader).equals(hashAccessToken) ) {
+//			throw new NegocioException("Refresh token inválido.");
+//		}
 		
 		Usuario usuario = this.find(idUsuario);
 

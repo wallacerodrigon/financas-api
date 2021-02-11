@@ -14,6 +14,7 @@ import br.net.walltec.api.excecoes.PersistenciaException;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.AbstractPersistenciaPadraoDao;
 import br.net.walltec.api.persistencia.dao.comum.ParametrosBuilder;
+import br.net.walltec.api.utilitarios.UtilData;
 
 @Named
 public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento> implements LancamentoDao {
@@ -39,6 +40,41 @@ public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento>
 			throw new IllegalArgumentException(e);
 		} 
 	}
+
+	@Override
+	public List<Lancamento> listarLancamentosDoAno(Integer ano, Integer idUsuario) {
+		
+		Date dataInicial = UtilData.createDataSemHoras(1, 1, ano);
+		Date dataFinal = UtilData.createDataSemHoras(31, 12, ano);
+		
+		StringBuilder builder = new StringBuilder("from Lancamento ");
+		
+		builder.append("where dataVencimento between :dataInicial and :dataFinal");
+		builder.append("  and usuario.idUsuario = :idUsuario ");
+		builder.append("order by dataVencimento");
+		
+		Pageable pageable = new PageRequest(0, 99999);
+		
+		ParametrosBuilder parametros = new ParametrosBuilder()
+				.addParametro("dataInicial", dataInicial)
+				.addParametro("dataFinal", dataFinal)
+				.addParametro("idUsuario", idUsuario);
+		
+        try {
+        	PageResponse<List<Lancamento>> response = this.pesquisar(builder, pageable, parametros);
+        	
+        	return response.getResultado();
+        	
+		} catch (PersistenciaException e) {
+			throw new IllegalArgumentException(e);
+		}	}
+
+	/**
+	 * @param ano
+	 * @param response
+	 * @return
+	 */
+	
 
 	
 }

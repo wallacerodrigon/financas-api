@@ -13,7 +13,7 @@ public class Constantes {
 
 	public static final String PERSISTENCE_UNIT ="puSysfinanc";
 
-    public static final String[] meses = new String[]{"Janeiro", "Fevereiro", "Março", "Abril","Maio",
+    public static final String[] MESES_DO_ANO = new String[]{"Janeiro", "Fevereiro", "Março", "Abril","Maio",
             "Junho", "Julho", "Agosto", "Setembro", "Outubro",
             "Novembro", "Dezembro"};
 

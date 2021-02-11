@@ -80,6 +80,10 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	public boolean isPago() {
 		return this.dataHoraPagamento != null;
 	}
+	
+	public boolean isDespesa() {
+		return this.tipoLancamento.getBolDespesa();
+	}
 
 	public String getChavePorDescFormaPagto() {
 		return this.descLancamento + "@" + this.formaPagamento.getIdFormaPagamento();
