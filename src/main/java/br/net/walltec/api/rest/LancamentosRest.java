@@ -3,6 +3,7 @@
  */
 package br.net.walltec.api.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
@@ -24,6 +26,7 @@ import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
 import br.net.walltec.api.dto.ResumoLancamentosMesAnoDTO;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.WebServiceException;
 import br.net.walltec.api.negocio.servicos.LancamentoService;
@@ -37,6 +40,7 @@ import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.UtilData;
+import br.net.walltec.api.utilitarios.UtilObjeto;
 import br.net.walltec.api.validadores.ValidadorDados;
 import io.swagger.annotations.Api;
 
@@ -81,10 +85,23 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 	}
 	
 	@GET
-	@Path("/filtrar/mes/{mes}/ano/{ano}")
-	public RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>> listarLancamentos(@PathParam("mes") Integer mes, @PathParam("ano") Integer ano) {
+	@Path("/filtrar/dataInicial/{dataInicial}/dataFinal/{dataFinal}")
+	public RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>> listarLancamentos(
+			@PathParam("dataInicial") String dataInicial, @PathParam("dataFinal") String dataFinal,
+			@QueryParam("idTipoLancamento") Integer idTipoLancamento
+			) {
 		try {
-			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(mes, ano, RequisicaoInterceptor.usuarioLogado.getIdUsuario());
+			
+			Date dataInicio = UtilData.getDataPorPattern(dataInicial, UtilData.PATTERN_DATA_ISO);
+			Date dataFim = UtilData.getDataPorPattern(dataFinal, UtilData.PATTERN_DATA_ISO);
+			TipoLancamento tipoLancamento = null;
+			
+			if (UtilObjeto.isNotVazio(idTipoLancamento)) {
+				tipoLancamento = new TipoLancamento();
+				tipoLancamento.setIdTipoLancamento(idTipoLancamento);
+			}
+			
+			PageResponse<List<LancamentosConsultaDTO>> listaLancamentos = this.servico.filtrarLancamentos(dataInicio, dataFim, tipoLancamento, RequisicaoInterceptor.usuarioLogado.getIdUsuario());
 			
 			return new RetornoRestDTO<PageResponse<List<LancamentosConsultaDTO>>>().comEsteCodigo(Status.OK)
 					.comEsteRetorno(listaLancamentos)

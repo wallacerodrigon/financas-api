@@ -28,6 +28,7 @@ import br.net.walltec.api.entidades.Banco;
 import br.net.walltec.api.entidades.FechamentoContabil;
 import br.net.walltec.api.entidades.FormaPagamento;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.entidades.Usuario;
 import br.net.walltec.api.excecoes.CampoObrigatorioException;
 import br.net.walltec.api.excecoes.NegocioException;
@@ -151,17 +152,14 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 
 
 	@Override
-	public PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano, Integer idUsuario) throws NegocioException {
+	public PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Date dataInicial, Date dataFinal, TipoLancamento tipoLancamento, Integer idUsuario) throws NegocioException {
 		
-		if (UtilObjeto.isVazio(mes) || UtilObjeto.isVazio(ano) ) {
-			throw new CampoObrigatorioException("Mës ou ano não informados");
+		if (UtilObjeto.isVazio(dataInicial) || UtilObjeto.isVazio(dataFinal) ) {
+			throw new CampoObrigatorioException("Período não informado");
 		}
 		
-		Date dataInicial = UtilData.createDataSemHoras(1, mes, ano);
-		Date dataFinal = UtilData.getUltimaDataMes(dataInicial);
-		
 		try {
-			PageResponse<List<Lancamento>> parcelas = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
+			PageResponse<List<Lancamento>> parcelas = lancamentoDao.listarParcelas(dataInicial, dataFinal, tipoLancamento, idUsuario);
 
 			Map<Lancamento, List<Lancamento>> mapLancamentosPorOrigem = 
 						parcelas.getResultado()
@@ -334,7 +332,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 	 * @param dataFinal
 	 */
 	private void excluirLancamentosSalvos(Banco banco, Date dataInicial, Date dataFinal, Integer idUsuario) {
-		PageResponse<List<Lancamento>> response = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
+		PageResponse<List<Lancamento>> response = lancamentoDao.listarParcelas(dataInicial, dataFinal, null, idUsuario);
 
 		List<Lancamento> lancamentosComDependencia = response.getResultado().stream()
 				.filter(lanc -> lanc.getLancamentoOrigem() != null)
@@ -346,7 +344,7 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 				banco.getFormaPagamentoParaConciliacao(), true,
 				lancamentosComDependencia);
 		
-		response = lancamentoDao.listarParcelas(dataInicial, dataFinal, idUsuario);
+		response = lancamentoDao.listarParcelas(dataInicial, dataFinal, null, idUsuario);
 		List<Lancamento> lancamentosComDependenciaPosExclusao = response.getResultado().stream()
 				.filter(lanc -> lanc.getLancamentoOrigem() != null)
 				.map(lanc -> lanc.getLancamentoOrigem())
