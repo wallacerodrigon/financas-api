@@ -4,6 +4,7 @@
 package br.net.walltec.api.negocio.servicos;
 
 
+import java.util.Date;
 import java.util.List;
 
 import br.net.walltec.api.comum.PageResponse;
@@ -11,6 +12,7 @@ import br.net.walltec.api.dto.DivisaoLancamentoDTO;
 import br.net.walltec.api.dto.GeracaoLancamentosDTO;
 import br.net.walltec.api.dto.ResumoLancamentosMesAnoDTO;
 import br.net.walltec.api.entidades.Lancamento;
+import br.net.walltec.api.entidades.TipoLancamento;
 import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
@@ -27,7 +29,7 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 
 	boolean excluirParcelas(List<Integer> idsLancamentos) throws NegocioException;
 	
-	PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Integer mes, Integer ano, Integer idUsuario) throws NegocioException;
+	PageResponse<List<LancamentosConsultaDTO>> filtrarLancamentos(Date dataInicial, Date dataFinal, TipoLancamento tipoLancamento, Integer idUsuario) throws NegocioException;
 	
 	void importarArquivo(ImportadorArquivoDTO importadorDto, Integer idUsuario) throws NegocioException;
 
