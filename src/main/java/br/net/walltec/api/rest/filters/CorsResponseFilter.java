@@ -7,10 +7,7 @@ import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
-
-import br.net.walltec.api.rest.comum.RetornoRestDTO;
 
 /**
  * @author wallace
@@ -25,8 +22,14 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 		
 		responseContext.getHeaders().putSingle("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, X-Codingpedia,Authorization,refreshtoken");
 		responseContext.getHeaders().putSingle("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-		//responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://www.walltec.net.br");
-		responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
+		
+		String serverName = requestContext.getHeaderString("Origin");
+		
+		if (serverName.contains("localhost")) {
+			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:4200");
+		} else {
+			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
+		}
 		responseContext.getHeaders().putSingle("Content-Security-Policy","script-src 'self';img-src 'self';style-src 'self';base-uri 'self'");
 	}
 
