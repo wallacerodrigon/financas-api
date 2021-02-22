@@ -229,7 +229,7 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 	 * @return
 	 */
 	private Cookie gerarCookieRefreshToken(String refreshToken) {
-		String path = ""; //getRequest().getContextPath()+"/auth/refresh-token";
+		String path = "/"; //getRequest().getContextPath()+"/auth/refresh-token";
 		String domain = getRequest().getServerName();
 		boolean ehHttps = this.isLocalHost() ? false : true;
 		Cookie c = new Cookie("refreshToken", refreshToken);
