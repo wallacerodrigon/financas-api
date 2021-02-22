@@ -25,10 +25,12 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 		
 		String serverName = requestContext.getHeaderString("Origin");
 		
-		if (serverName.contains("localhost")) {
-			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:4200");
-		} else {
+		System.out.println("servidor: " + serverName);
+		
+		if (serverName.contains("walltec.dev")) {
 			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
+		} else {
+			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:4200");
 		}
 		responseContext.getHeaders().putSingle("Content-Security-Policy","script-src 'self';img-src 'self';style-src 'self';base-uri 'self'");
 	}
