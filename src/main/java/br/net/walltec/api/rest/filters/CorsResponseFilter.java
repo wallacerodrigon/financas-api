@@ -25,7 +25,6 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 		
 		String serverName = requestContext.getHeaderString("Origin");
 		
-		System.out.println("servidor: " + serverName);
 		
 		if (serverName.contains("walltec.dev")) {
 			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
@@ -33,6 +32,10 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:4200");
 		}
 		responseContext.getHeaders().putSingle("Content-Security-Policy","script-src 'self';img-src 'self';style-src 'self';base-uri 'self'");
+		
+		System.out.println("headers: " + responseContext.getHeaders().toString());
+		
+		
 	}
 
 }
