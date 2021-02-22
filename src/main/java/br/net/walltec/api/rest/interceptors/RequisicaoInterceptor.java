@@ -60,7 +60,7 @@ public class RequisicaoInterceptor {
 					
 					RequisicaoInterceptor.usuarioLogado = new TokenManager().getUsuarioFromToken(token);
 					
-					//validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
+					validarAutorizacao(token, target, contexto.getMethod()); // valida autorização
 					
 				}
 				log.info("Finalizando interceptor");
