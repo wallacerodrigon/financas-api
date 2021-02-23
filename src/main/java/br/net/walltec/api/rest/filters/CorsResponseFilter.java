@@ -24,7 +24,7 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 		responseContext.getHeaders().putSingle("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
 		
 		String serverName = requestContext.getHeaderString("Origin");
-		
+		serverName = serverName == null ? requestContext.getHeaderString("Host") : serverName;
 		
 		if (serverName.contains("walltec.dev")) {
 			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
