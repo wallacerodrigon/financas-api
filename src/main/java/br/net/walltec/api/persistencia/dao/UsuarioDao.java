@@ -17,4 +17,7 @@ import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 public interface UsuarioDao extends PersistenciaPadraoDao<Usuario> {
 
 	Usuario recuperarUsuario(String email, String senha) throws PersistenciaException;
+	
+	Usuario recuperarUsuarioPorEmail(String email) throws PersistenciaException;
+
 }

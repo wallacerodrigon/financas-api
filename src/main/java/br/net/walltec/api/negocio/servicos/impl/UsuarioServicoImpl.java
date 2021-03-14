@@ -60,10 +60,12 @@ public class UsuarioServicoImpl extends AbstractCrudServicePadrao<Usuario> imple
 		try {
 			ValidadorDados.validarDadosEntrada(dto);
 
-			Usuario u = usuarioDao.recuperarUsuario(dto.getEmail(), this.montarSenhaSegura(dto.getSenha()) );
+			Usuario u = dto.isBolRedeSocial() ?
+					usuarioDao.recuperarUsuarioPorEmail(dto.getEmail()) :
+					usuarioDao.recuperarUsuario(dto.getEmail(), this.montarSenhaSegura(dto.getSenha()) );
 
 			if (! u.isBolAtivo()) {
-				throw new RegistroNaoEncontradoException("Usuário não encontrado");
+				throw new RegistroNaoEncontradoException("Usuário desabilitado para acesso ao sistema");
 			}
 
 			UsuarioRetornoLoginDTO dtoRetorno = new UsuarioRetornoLoginDTO();
