@@ -82,9 +82,13 @@ public class UsuarioRest extends RequisicaoRestPadrao<Usuario> {
 		objeto.setDataInclusao(new Date());
 		objeto.setDataUltimoAcesso(new Date());
 		objeto.setQtdAcessos( 0); 
-		objeto.setDescSenha( UtilCriptografia.criptografa(objeto.getNumCpf())  );
+		objeto.setDescSenha( UtilCriptografia.criptografa(objeto.getDescemail())  );
 		
-		return super.salvar(objeto);
+		RetornoRestDTO<Usuario> dto = super.salvar(objeto);
+		
+		//enviar e-mail com a senha gerada
+		
+		return dto;
 		
 	}
 	

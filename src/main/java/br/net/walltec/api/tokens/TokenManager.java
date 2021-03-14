@@ -51,7 +51,6 @@ public class TokenManager {
 						.setIssuedAt(new Date())
 						.claim(USER_NAME, usuario.getNomeUsuario())
 						.claim(USER_ID, usuario.getIdUsuario())
-						.claim(USER_CPF, usuario.getNumCpf())
 						.claim(ROLE_NAME, usuario.getPerfil().getNomePerfil())
 						.claim(ROLE_ID, usuario.getPerfil().getIdPerfil())
 						.claim(USER_MAIL, usuario.getDescemail())

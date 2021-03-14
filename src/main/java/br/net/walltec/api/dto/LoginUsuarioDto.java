@@ -21,4 +21,5 @@ public class LoginUsuarioDto {
 	private String senha;
 	
 
+	private boolean bolRedeSocial = false;
 }
