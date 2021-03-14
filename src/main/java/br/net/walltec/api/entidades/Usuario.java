@@ -41,10 +41,10 @@ public class Usuario extends EntidadeBasica<Usuario> {
 	@NotNull(message="Nome do usuário é obrigatório")
 	private String nomeUsuario;
 	
-	@Column(nullable=false, length=14)	
-	@NotNull(message="CPF é obrigatório")
-	@Size(min=11, max=14, message="CPF deve ter entre {min} e {max} dígitos")
-	private String numCpf;
+//	@Column(nullable=false, length=14)	
+//	@NotNull(message="CPF é obrigatório")
+//	@Size(min=11, max=14, message="CPF deve ter entre {min} e {max} dígitos")
+//	private String numCpf;
 	
 
 	@Column(nullable=false, length=10)
