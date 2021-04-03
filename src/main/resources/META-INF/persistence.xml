@@ -5,7 +5,7 @@
 	version="2.0">
 
 	<persistence-unit name="puFinancas" transaction-type="JTA">
-		<jta-data-source>java:/financas-ds</jta-data-source>
+<!-- 		<jta-data-source>java:/financas-ds-heroku</jta-data-source> -->
 		<class>br.net.walltec.api.entidades.Banco</class>
 		<class>br.net.walltec.api.entidades.Lancamento</class>
 		<class>br.net.walltec.api.entidades.Usuario</class>
@@ -22,7 +22,10 @@
 		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
 		
 		<properties>
-		
+			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgres://ec2-34-225-103-117.compute-1.amazonaws.com:5432:dfmdhh76fdmpjp" />
+            <property name="javax.persistence.jdbc.user" value="tyklqzamhlyxji" />
+            <property name="javax.persistence.jdbc.password" value="66384809b16465f0392cfd58bc568dc7d50ce75caf944f6922852b4b66701e33" />
 			<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />	
