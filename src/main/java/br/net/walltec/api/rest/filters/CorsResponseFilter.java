@@ -26,11 +26,11 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 		String serverName = requestContext.getHeaderString("Origin");
 		serverName = serverName == null ? requestContext.getHeaderString("Host") : serverName;
 		
-		if (serverName.contains("walltec.dev")) {
-			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
-		} else {
+		////if (serverName.contains("walltec.dev")) {
+			//responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "https://walltec.dev.br");
+		//} else {
 			responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
-		}
+		//}
 		responseContext.getHeaders().putSingle("Content-Security-Policy","script-src 'self';img-src 'self';style-src 'self';base-uri 'self'");
 		
 		System.out.println("headers: " + responseContext.getHeaders().toString());
