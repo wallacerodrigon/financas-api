@@ -11,7 +11,9 @@ import br.net.walltec.api.comum.PageResponse;
 import br.net.walltec.api.comum.Pageable;
 import br.net.walltec.api.entidades.Lancamento;
 import br.net.walltec.api.entidades.TipoLancamento;
+import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.excecoes.PersistenciaException;
+import br.net.walltec.api.excecoes.RegistroNaoEncontradoException;
 import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.AbstractPersistenciaPadraoDao;
 import br.net.walltec.api.persistencia.dao.comum.ParametrosBuilder;
@@ -76,6 +78,31 @@ public class LancamentoDaoImpl extends AbstractPersistenciaPadraoDao<Lancamento>
 		} catch (PersistenciaException e) {
 			throw new IllegalArgumentException(e);
 		}	}
+
+	@Override
+	public Lancamento recuperarPeloCodBarras(String numCodBarras) throws NegocioException {
+		ParametrosBuilder parametros = new ParametrosBuilder()
+				.addParametro("numCodBarras", numCodBarras);
+		
+		
+		StringBuilder builder = new StringBuilder("from Lancamento ");
+		
+		builder.append("where numCodBarras = :numCodBarras ");
+		
+		Pageable pageable = new PageRequest(0, 99999);
+        try {
+			PageResponse<List<Lancamento>> response = this.pesquisar(builder, pageable, parametros);
+			
+			if (response.isEmpty()) {
+				throw new RegistroNaoEncontradoException("Não há lançamentos registrados com este código de barras");
+			}
+			
+			return response.getResultado().get(0);
+			
+		} catch (PersistenciaException e) {
+			throw new IllegalArgumentException(e);
+		} 
+	}
 
 	/**
 	 * @param ano

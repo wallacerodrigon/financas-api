@@ -37,12 +37,14 @@ import br.net.walltec.api.rest.dto.AlteracaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.InclusaoLancamentoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.RegistroCodBarrasDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.UtilData;
 import br.net.walltec.api.utilitarios.UtilObjeto;
 import br.net.walltec.api.validadores.ValidadorDados;
 import io.swagger.annotations.Api;
+import io.swagger.jaxrs.PATCH;
 
 
 /**
@@ -307,6 +309,57 @@ public class LancamentosRest extends RequisicaoRestPadrao<Lancamento> {
 					.construir();
 		} catch (Exception e) {
 			return new RetornoRestDTO().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
+	
+	@PATCH
+	@Path("/registrar-cod-barras")	
+	public RetornoRestDTO<Void> alterar(RegistroCodBarrasDTO objeto) throws WebServiceException {
+		try {
+			ValidadorDados.validarDadosEntrada(objeto);
+			this.servico.registrarCodigoBarras(objeto);
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.OK).comEsteRetorno(objeto).construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
+	
+	@PATCH
+	@Path("/baixar-com-cod-barras/{numCodBarras}")	
+	public RetornoRestDTO<Void> pagarComCodigoBarras(@PathParam("numCodBarras") String numCodBarras) throws WebServiceException {
+		try {
+			this.servico.baixarComCodigoBarras(numCodBarras);
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.OK).construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO<Void>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
+					.construir();
+		}
+	}
+	
+	@GET
+	@Path("/recuperar-pelo-cod-barras/{numcodBarras}")
+	public RetornoRestDTO<LancamentosConsultaDTO> recuperarLancamentoPeloCodBarras(
+			@PathParam("numcodBarras") String numcodBarras
+			) {
+		try {
+			LancamentosConsultaDTO dto = this.servico.recuperarPeloCodBarras(numcodBarras);
+			
+			return new RetornoRestDTO<LancamentosConsultaDTO>().comEsteCodigo(Status.OK)
+					.comEsteRetorno(dto)
+					.construir();
+		} catch (NegocioException e) {
+			return new RetornoRestDTO<LancamentosConsultaDTO>().comEsteCodigo(Status.BAD_REQUEST).comEstaMensagem(e.getMessage())
+					.construir();
+		} catch (Exception e) {
+			return new RetornoRestDTO<LancamentosConsultaDTO>().comEsteCodigo(Status.INTERNAL_SERVER_ERROR).comEstaMensagem(e.getMessage())
 					.construir();
 		}
 	}

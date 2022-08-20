@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import br.net.walltec.api.persistencia.dao.LancamentoDao;
 import br.net.walltec.api.persistencia.dao.comum.PersistenciaPadraoDao;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.RegistroCodBarrasDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 import br.net.walltec.api.rest.interceptors.RequisicaoInterceptor;
 import br.net.walltec.api.utilitarios.Constantes;
@@ -620,5 +622,62 @@ public class LancamentoServicoImpl extends AbstractCrudServicePadrao<Lancamento>
 						
 		}
 	}
+
+
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+	@Override
+	public void registrarCodigoBarras(RegistroCodBarrasDTO dto) throws NegocioException {
+		// TODO Auto-generated method stub
+		String numCodBarrasSemEspacos = getNumCodBarrasSemEspaco(dto.getNumCodBarras());
+		
+		try {
+			Lancamento lancamentoJaComCodBarras = this.lancamentoDao.recuperarPeloCodBarras(numCodBarrasSemEspacos);
+			if (lancamentoJaComCodBarras != null) {
+				throw new NegocioException("Código de barras já registrado em outro lançamento");
+			}
+		} catch(RegistroNaoEncontradoException e) {
+			Lancamento lancamento = this.find(dto.getIdLancamento());
+			
+			if (lancamento.isPago()) {
+				throw new NegocioException("Lançamento já pago, não há como registrar este código de barras");
+			}
+			
+			lancamento.setNumCodBarras(numCodBarrasSemEspacos);
+			this.alterar(lancamento);
+		} catch(Exception e) {
+			throw e;
+		}
+	}
+
+
+	@Transactional(rollbackOn = Exception.class, value = TxType.REQUIRES_NEW )
+	@Override
+	public void baixarComCodigoBarras(String numCodBarras) throws NegocioException {
+		// TODO Auto-generated method stub
+		Lancamento lancamento = this.lancamentoDao.recuperarPeloCodBarras(getNumCodBarrasSemEspaco(numCodBarras));
+		this.baixarParcelas(Arrays.asList(lancamento.getIdLancamento()));
+	}
+	
+	private String getNumCodBarrasSemEspaco(String numCodBarras) {
+		String numCodBarrasSoNumeros = UtilObjeto.manterSomenteNumeros(numCodBarras);
+		
+		if (numCodBarrasSoNumeros.length() < 48) {
+			throw new IllegalArgumentException("Número de código de barras inválido. Deve ter 48 dígitos.");
+		}
+		
+		return numCodBarrasSoNumeros;
+		
+	}
+
+
+
+	@Override
+	public LancamentosConsultaDTO recuperarPeloCodBarras(String numCodBarras) throws NegocioException {
+		// TODO Auto-generated method stub
+		Lancamento l = this.lancamentoDao.recuperarPeloCodBarras(getNumCodBarrasSemEspaco(numCodBarras));
+		return new LancamentosConsultaDTO(l, null);
+	}
+	
+	
 	
 }

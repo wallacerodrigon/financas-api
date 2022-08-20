@@ -17,6 +17,7 @@ import br.net.walltec.api.excecoes.NegocioException;
 import br.net.walltec.api.negocio.servicos.comum.CrudPadraoService;
 import br.net.walltec.api.rest.dto.ImportadorArquivoDTO;
 import br.net.walltec.api.rest.dto.LancamentosConsultaDTO;
+import br.net.walltec.api.rest.dto.RegistroCodBarrasDTO;
 import br.net.walltec.api.rest.dto.UploadDocumentoDTO;
 
 /**
@@ -42,4 +43,11 @@ public interface LancamentoService extends CrudPadraoService<Lancamento> {
 	void gerarLoteLancamentos(GeracaoLancamentosDTO dto) throws NegocioException;
 	
 	List<ResumoLancamentosMesAnoDTO> listarResumoLancamentosDoAno(Integer ano, Integer idUsuario) throws NegocioException;
+	
+	void registrarCodigoBarras(RegistroCodBarrasDTO dto) throws NegocioException;
+	
+	void baixarComCodigoBarras(String numCodBarras) throws NegocioException;
+	
+	LancamentosConsultaDTO recuperarPeloCodBarras(String numCodBarras) throws NegocioException;
+
 }

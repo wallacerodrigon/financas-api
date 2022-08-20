@@ -77,6 +77,8 @@ public class Lancamento extends EntidadeBasica<Lancamento> {
 	@JoinColumn(name="idUsuario")
 	private Usuario usuario;
 	
+	private String numCodBarras;
+	
 	public boolean isPago() {
 		return this.dataHoraPagamento != null;
 	}
